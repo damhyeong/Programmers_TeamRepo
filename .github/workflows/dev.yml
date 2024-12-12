@@ -10,12 +10,18 @@ jobs:
     runs-on: ubuntu-latest # 실행될 인스턴스 OS와 버전
 
     steps:
-      - name: excuting remote ssh commands
+      - name: SSH Private Key 사용하기 위해 .pem 파일 만들기
+        env:
+          SSH_PRIVATE_KEY: ${{secrets.REMOTE_SECRET_KEY}}
+        run: |
+          chmod 600 private_key.pem
+
+      - name: remote ssh 명령 실행
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
         with:
           host: ${{ secrets.REMOTE_IP }} # 인스턴스 IP
           username: ${{ secrets.REMOTE_USER }} # 우분투 아이디
-          key: ${{ secrets.REMOTE_SECRET_KEY }} # ec2 instance pem key
+          key: private_key.pem # ec2 instance pem key
           port: ${{ secrets.REMOTE_SSH_PORT }} # 접속포트
           script: | # 실행할 스크립트
             cd /home/ec2-user/Programmers_TeamRepo
