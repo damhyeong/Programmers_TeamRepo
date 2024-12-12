@@ -27,7 +27,8 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }} # 접속포트
           script: | # 실행할 스크립트
             cd /home/ec2-user/Programmers_TeamRepo
-            git pull --rebase origin main
+            git reset --hard HEAD
+            git pull --ff-only origin main
             pm2 kill
             npm i --legacy-peer-deps  
             npm run build
