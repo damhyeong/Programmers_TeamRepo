@@ -16,6 +16,7 @@ jobs:
         run: |
           echo "${SSH_PRIVATE_KEY}" > private_key.pem
           chmod 600 private_key.pem 
+          cat private_key.pem
 
       - name: remote ssh 명령 실행
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
