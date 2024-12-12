@@ -18,7 +18,7 @@ jobs:
           chmod 600 private_key.pem 
           cat private_key.pem
 
-      - name: remote ssh 명령 실행
+      - name: remote ssh 명령 실행 and .env 환경설정 파일 생성
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
         with:
           host: ${{ secrets.REMOTE_IP }} # 인스턴스 IP
@@ -26,7 +26,14 @@ jobs:
           key: ${{secrets.REMOTE_SECRET_KEY}} # ec2 instance pem key
           port: ${{ secrets.REMOTE_SSH_PORT }} # 접속포트
           script: | # 실행할 스크립트
-            cd /home/ec2-user/Programmers_TeamRepo
+            cd /home/ec2-user/Programmers_TeamRepo # Project 로 이동
+            
+            echo "DB_HOST=${{ secrets.DB_HOST }}" > .env # .env 파일 생성과 동시에 DB_HOST 작성
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env # 이어붙이기 
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env # 이어붙이기 
+            echo "DB_TYPE=${{ secrets.DB_TYPE }}" >> .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
             git reset --hard HEAD
             git pull --ff-only origin main
             pm2 kill
