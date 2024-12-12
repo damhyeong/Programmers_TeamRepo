@@ -4,8 +4,8 @@ import { EmailCheckDto } from "./dto/email-check.dto";
 @Controller('users')
 export class UsersController {
   @Post('/email-check')
-  emailCheck(@Body() emailCheckDto : EmailCheckDto) {
 
+  emailCheck(@Body() emailCheckDto : EmailCheckDto) {
     return {message : "사용 가능한 이메일입니다."};
   }
 
