@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Posts } from './posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,15 +17,24 @@ export class PostsService {
     return await this.postRepository.save(post);
   }
 
-  //   meeting_id 받아서 해당 모임 게시글만 내려주게 해야됨.
-  async getManyPost() {
-    return await this.postRepository.find();
+  async getManyPost(where?: { meeting_id?: number }) {
+    const query = where?.meeting_id
+      ? { meeting_id: where.meeting_id }
+      : undefined;
+
+    return await this.postRepository.find({
+      where: query,
+      order: { id: 'ASC' },
+    });
   }
 
   async getPost(where: { id: number }) {
-    const post = await this.postRepository.findOne({ where });
+    const post = await this.postRepository.findOne({
+      where,
+      relations: ['replies'],
+    });
     if (!post) {
-      throw new BadRequestException();
+      throw new NotFoundException();
     }
 
     return post;
@@ -34,18 +43,30 @@ export class PostsService {
   async modifyPost({
     where,
     data,
+    user_id,
   }: {
     where: { id: number };
     data: ModifyPostDTO;
+    user_id: number;
   }) {
     await this.getPost(where);
 
-    return await this.postRepository.update(where, data);
+    await this.postRepository.update(where, data);
+
+    return { success: true };
   }
 
-  async removePost(where: { id: number }) {
+  async removePost({
+    where,
+    user_id,
+  }: {
+    where: { id: number };
+    user_id: number;
+  }) {
     await this.getPost(where);
 
-    return await this.postRepository.delete(where);
+    await this.postRepository.delete(where);
+
+    return { success: true };
   }
 }

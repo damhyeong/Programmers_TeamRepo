@@ -5,9 +5,11 @@ import {
   ManyToOne,
   CreateDateColumn,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 
 import { Meeting } from 'src/meeting/meeting.entity';
+import { Reply } from 'src/reply/reply.entity';
 
 @Entity()
 export class Posts {
@@ -40,6 +42,6 @@ export class Posts {
   //   @JoinColumn({ name: 'user_id' })
   //   user: User;
 
-  //   @OneToMany(() => Reply, (reply) => reply.post)
-  //   replies: Reply[];
+  @OneToMany(() => Reply, (reply) => reply.post)
+  replies: Reply[];
 }

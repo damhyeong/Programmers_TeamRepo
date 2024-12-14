@@ -18,7 +18,7 @@ export class CreatePostDTO {
   title: string;
 
   @ApiProperty()
-  @IsNumber()
+  @IsString()
   @IsOptional()
   img: string;
 
