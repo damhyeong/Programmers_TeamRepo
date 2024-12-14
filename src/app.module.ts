@@ -8,6 +8,8 @@ import { TopicModule } from './topic/topic.module';
 import { MeetingModule } from './meeting/meeting.module';
 import { Topic } from './topic/topic.entity';
 import { Meeting } from './meeting/meeting.entity';
+import { PostsModule } from './posts/posts.module';
+import { ReplyModule } from './reply/reply.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { Meeting } from './meeting/meeting.entity';
       entities: [Meeting, Topic],
       synchronize: true,
     }),
+    PostsModule,
+    ReplyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

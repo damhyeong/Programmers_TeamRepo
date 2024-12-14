@@ -13,6 +13,7 @@ import { MeetingService } from './meeting.service';
 import { Meeting } from './meeting.entity';
 import { MeetingDTO } from './dto/create-meeting.dto';
 
+// 토큰 적용 X 미팅 삭제, 수정 시 작성자인지 확인 해야 됨
 @ApiTags('meeting')
 @Controller('meeting')
 export class MeetingController {
