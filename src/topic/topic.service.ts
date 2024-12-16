@@ -10,6 +10,6 @@ export class TopicService {
   ) {}
 
   async findManyTopic() {
-    return await this.topicRepository.find();
+    return await this.topicRepository.find({ order: { id: 'ASC' } });
   }
 }

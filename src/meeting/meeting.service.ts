@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Meeting } from './meeting.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,19 +16,26 @@ export class MeetingService {
     return await this.meetingRepository.save(meeting);
   }
 
-  async findManyMeeting() {
-    return await this.meetingRepository.find();
+  async findManyMeeting(where?: { topic_id?: number }) {
+    const query = where?.topic_id ? { topic_id: where.topic_id } : undefined;
+
+    return await this.meetingRepository.find({
+      where: query,
+      order: { id: 'ASC' },
+      relations: ['posts'],
+    });
   }
 
   async findMeeting(where: { id: number }) {
     const meeting = await this.meetingRepository.findOne({ where });
     if (!meeting) {
-      return { success: false };
+      throw new NotFoundException();
     }
 
     return meeting;
   }
 
+  // 방장인지 확인해야 됨
   async modifyMeeting({
     where,
     data,
@@ -42,6 +49,7 @@ export class MeetingService {
     return { success: true };
   }
 
+  // 방장인지 확인
   async removeMeeting(where: { id: number }) {
     await this.findMeeting(where);
     await this.meetingRepository.delete(where);

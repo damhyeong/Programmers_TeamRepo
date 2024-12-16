@@ -10,6 +10,10 @@ import { Topic } from './topic/topic.entity';
 import { Meeting } from './meeting/meeting.entity';
 import { Users } from "./users/entity/users.entity";
 import { AuthModule } from './auth/auth.module';
+import { PostsModule } from './posts/posts.module';
+import { ReplyModule } from './reply/reply.module';
+import { Posts } from './posts/posts.entity';
+import { Reply } from './reply/reply.entity';
 
 @Module({
   imports: [
@@ -24,10 +28,12 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [Meeting, Topic, Users],
+      entities: [Meeting, Topic, Posts, Reply, Users],
       synchronize: true,
     }),
     AuthModule,
+    PostsModule,
+    ReplyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

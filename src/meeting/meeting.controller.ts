@@ -7,12 +7,15 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { MeetingService } from './meeting.service';
 import { Meeting } from './meeting.entity';
 import { MeetingDTO } from './dto/create-meeting.dto';
+import { FindManyMeetingDTO } from './dto/find-meeting.dto';
 
+// 토큰 적용 X 미팅 삭제, 수정 시 작성자인지 확인 해야 됨
 @ApiTags('meeting')
 @Controller('meeting')
 export class MeetingController {
@@ -25,8 +28,9 @@ export class MeetingController {
   }
 
   @Get()
-  async getManyMeeting() {
-    return await this.meetingService.findManyMeeting();
+  @ApiQuery({ type: FindManyMeetingDTO })
+  async getManyMeeting(@Query() query: FindManyMeetingDTO) {
+    return await this.meetingService.findManyMeeting(query);
   }
 
   @Get(':id')
