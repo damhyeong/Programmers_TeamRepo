@@ -6,11 +6,16 @@ import { SignUpDto } from "./dto/sign-up.dto";
 import { EmailCheckDto } from "./dto/email-check.dto";
 import * as bcrypt from "bcrypt"
 import { LoginDto } from "./dto/login.dto";
+import { AuthService } from "../auth/auth.service";
+import { PayloadDto } from "../auth/dto/payload.dto";
 
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(Users) private usersRepository : Repository<Users>) {}
+  constructor(
+    @InjectRepository(Users) private usersRepository : Repository<Users>,
+    private authService : AuthService
+  ) {}
 
   async createUser(signUpDto : SignUpDto): Promise<Boolean> {
     const hashPwd = await bcrypt.hash(signUpDto.password, 10);
@@ -33,13 +38,28 @@ export class UsersService {
     return (userEntity) ? true : false;
   }
 
-  async userLogin(loginDto : LoginDto) : Promise<Boolean> {
+  async userLogin(loginDto : LoginDto) : Promise<{access_token: string | null}> {
     const email : string = loginDto.email
 
     const userEntity = await this.usersRepository.findOne({
       where : {email}
     });
 
-    return await bcrypt.compare(loginDto.password, userEntity.password);
+    const isSuccess = await bcrypt.compare(loginDto.password, userEntity.password);
+
+    const result = {
+      access_token : null,
+    }
+
+    if(isSuccess) {
+      const payload : PayloadDto = {
+        sub : userEntity.id,
+        username : userEntity.username,
+        email : userEntity.email,
+      }
+      result["access_token"] = await this.authService.makeAccessToken(payload);
+    }
+
+    return result;
   }
 }

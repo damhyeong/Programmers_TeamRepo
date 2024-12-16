@@ -1,4 +1,4 @@
-import { IsDateString, IsEmail, IsNotEmpty, IsString, IsUrl } from "class-validator";
+import { IsDateString, IsEmail, IsEmpty, IsNotEmpty, IsString, IsUrl } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class SignUpDto {
@@ -10,6 +10,14 @@ export class SignUpDto {
     example : "test@gmail.com"
   })
   email : string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description : "nickname, 즉 사용자가 사이트에서 원하는 이름",
+    example : "담순쨩"
+  })
+  username : string;
 
   @IsString()
   @IsNotEmpty()
