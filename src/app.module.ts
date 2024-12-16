@@ -9,6 +9,7 @@ import { MeetingModule } from './meeting/meeting.module';
 import { Topic } from './topic/topic.entity';
 import { Meeting } from './meeting/meeting.entity';
 import { Users } from "./users/entity/users.entity";
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Users } from "./users/entity/users.entity";
       entities: [Meeting, Topic, Users],
       synchronize: true,
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
