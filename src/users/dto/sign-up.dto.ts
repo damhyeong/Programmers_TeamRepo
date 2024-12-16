@@ -17,6 +17,7 @@ export class SignUpDto {
     description : "Gender - 성별",
     examples : ["female", "male"]
   })
+  gender : string
 
   @IsDateString()
   @IsNotEmpty()

@@ -8,6 +8,7 @@ import { TopicModule } from './topic/topic.module';
 import { MeetingModule } from './meeting/meeting.module';
 import { Topic } from './topic/topic.entity';
 import { Meeting } from './meeting/meeting.entity';
+import { Users } from "./users/entity/users.entity";
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { Meeting } from './meeting/meeting.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [Meeting, Topic],
+      entities: [Meeting, Topic, Users],
       synchronize: true,
     }),
   ],
