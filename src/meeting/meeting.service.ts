@@ -3,7 +3,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Meeting } from './meeting.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MeetingDTO } from './dto/create-meeting.dto';
@@ -36,12 +36,28 @@ export class MeetingService {
     return savedMeeting;
   }
 
-  async findManyMeeting(where?: { topic_id?: number; page: number }) {
+  async findManyMeeting(where?: {
+    topic_id?: number;
+    page: number;
+    keyword?: string;
+  }) {
     const SKIP = (where.page - 1) * LIMIT;
-    const query = where?.topic_id ? { topic_id: where.topic_id } : undefined;
+
+    const query: any = {};
+    if (where?.topic_id) {
+      query.topic_id = where.topic_id;
+    }
+
+    const conditions: any[] = [];
+    if (where?.keyword) {
+      conditions.push(
+        { title: Like(`%${where.keyword}%`) },
+        { description: Like(`%${where.keyword}%`) },
+      );
+    }
 
     const [data, total] = await this.meetingRepository.findAndCount({
-      where: query,
+      where: conditions.length ? conditions : query,
       take: LIMIT,
       skip: SKIP,
       order: { created_at: 'DESC' },

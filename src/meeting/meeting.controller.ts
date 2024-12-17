@@ -60,6 +60,7 @@ export class MeetingController {
   @Get()
   @ApiQuery({ name: 'topic_id', required: false, type: Number })
   @ApiQuery({ name: 'page', required: true, type: Number })
+  @ApiQuery({ name: 'keyword', required: false, type: String })
   async getManyMeeting(@Query() query: FindManyMeetingDTO) {
     return await this.meetingService.findManyMeeting(query);
   }

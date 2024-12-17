@@ -1,4 +1,4 @@
-import { IsOptional, IsNumber, IsNotEmpty } from 'class-validator';
+import { IsOptional, IsNumber, IsNotEmpty, IsString } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class FindManyMeetingDTO {
@@ -11,4 +11,8 @@ export class FindManyMeetingDTO {
   @IsNumber()
   @Type(() => Number)
   page: number;
+
+  @IsOptional()
+  @IsString()
+  keyword: string;
 }
