@@ -10,23 +10,23 @@ import {
   Query,
   Headers,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiHeader,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { MeetingService } from './meeting.service';
 import { Meeting } from './meeting.entity';
 import { MeetingDTO } from './dto/create-meeting.dto';
 import { FindManyMeetingDTO } from './dto/find-meeting.dto';
+import { MeetingUsersService } from 'src/meeting-users/meeting-users.service';
+import { AuthService } from 'src/auth/auth.service';
 
 @ApiTags('meeting')
 @ApiBearerAuth('access-token')
 @Controller('meeting')
 export class MeetingController {
-  constructor(private meetingService: MeetingService) {}
+  constructor(
+    private meetingService: MeetingService,
+    private meetingUserService: MeetingUsersService,
+    private authService: AuthService,
+  ) {}
 
   @Post()
   @ApiBody({ type: MeetingDTO })
@@ -40,8 +40,26 @@ export class MeetingController {
     );
   }
 
+  @Post(':id/participation')
+  async postMeetingParticipation(
+    @Headers('authorization') token: string,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const { sub } = await this.authService.verifyToken(
+      token.replace('Bearer ', ''),
+    );
+
+    await this.meetingService.findMeeting({ id });
+
+    return await this.meetingUserService.createMeetingUser(sub, {
+      meeting_id: id,
+      role: 'member',
+    });
+  }
+
   @Get()
-  @ApiQuery({ type: FindManyMeetingDTO })
+  @ApiQuery({ name: 'topic_id', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: true, type: Number })
   async getManyMeeting(@Query() query: FindManyMeetingDTO) {
     return await this.meetingService.findManyMeeting(query);
   }

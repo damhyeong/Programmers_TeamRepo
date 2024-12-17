@@ -8,12 +8,15 @@ import { Meeting } from './meeting.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MeetingDTO } from './dto/create-meeting.dto';
 import { AuthService } from 'src/auth/auth.service';
+import { LIMIT } from 'src/common/constant/page';
+import { MeetingUsersService } from 'src/meeting-users/meeting-users.service';
 
 @Injectable()
 export class MeetingService {
   constructor(
     @InjectRepository(Meeting) private meetingRepository: Repository<Meeting>,
     private readonly authService: AuthService,
+    private meetingUserService: MeetingUsersService,
   ) {}
 
   async createMeeting(token: string, data: MeetingDTO): Promise<Meeting> {
@@ -23,27 +26,57 @@ export class MeetingService {
       owner_user_id: sub,
       ...data,
     });
+    const savedMeeting = await this.meetingRepository.save(meeting);
 
-    return await this.meetingRepository.save(meeting);
+    await this.meetingUserService.createMeetingUser(sub, {
+      meeting_id: savedMeeting.id,
+      role: 'master',
+    });
+
+    return savedMeeting;
   }
 
-  async findManyMeeting(where?: { topic_id?: number }) {
+  async findManyMeeting(where?: { topic_id?: number; page: number }) {
+    const SKIP = (where.page - 1) * LIMIT;
     const query = where?.topic_id ? { topic_id: where.topic_id } : undefined;
 
-    return await this.meetingRepository.find({
+    const [data, total] = await this.meetingRepository.findAndCount({
       where: query,
-      order: { id: 'ASC' },
+      take: LIMIT,
+      skip: SKIP,
+      order: { created_at: 'DESC' },
       relations: ['posts'],
     });
+
+    return {
+      meeting: data,
+      total,
+      currentPage: where.page,
+      totalPages: Math.ceil(total / LIMIT),
+    };
   }
 
   async findMeeting(where: { id: number }) {
-    const meeting = await this.meetingRepository.findOne({ where });
+    const meeting = await this.meetingRepository.findOne({
+      where,
+      relations: ['meeting_users', 'meeting_users.user'],
+    });
     if (!meeting) {
       throw new NotFoundException();
     }
 
-    return meeting;
+    const meetingUsersWithUserDTO = meeting.meeting_users.map((meetingUser) => {
+      const { password, ...userWithoutPassword } = meetingUser.user;
+      return {
+        ...meetingUser,
+        user: userWithoutPassword,
+      };
+    });
+
+    return {
+      ...meeting,
+      meeting_users: meetingUsersWithUserDTO,
+    };
   }
 
   async modifyMeeting({
@@ -67,7 +100,6 @@ export class MeetingService {
     return { success: true };
   }
 
-  // 방장인지 확인
   async removeMeeting({
     token,
     where,

@@ -10,6 +10,7 @@ import {
 
 import { Meeting } from 'src/meeting/meeting.entity';
 import { Reply } from 'src/reply/reply.entity';
+import { Users } from 'src/users/entity/users.entity';
 
 @Entity()
 export class Posts {
@@ -34,16 +35,13 @@ export class Posts {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToOne(() => Meeting, (meeting) => meeting.posts, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Meeting, (meeting) => meeting.posts)
   @JoinColumn({ name: 'meeting_id' })
   meeting: Meeting;
 
-  //   @ManyToOne(() => User, (user) => user.id)
-  //   @JoinColumn({ name: 'user_id' })
-  //   user: User;
+  @ManyToOne(() => Users, (user) => user.posts)
+  @JoinColumn({ name: 'user_id' })
+  user: Users;
 
   @OneToMany(() => Reply, (reply) => reply.post)
   replies: Reply[];

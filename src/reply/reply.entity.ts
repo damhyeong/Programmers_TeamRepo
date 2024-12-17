@@ -1,4 +1,5 @@
 import { Posts } from 'src/posts/posts.entity';
+import { Users } from 'src/users/entity/users.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -22,27 +23,24 @@ export class Reply {
   @Column({ nullable: true })
   reply_id?: number;
 
+  @Column({ default: true })
+  is_show: boolean;
+
   @Column({ type: 'text' })
   content: string;
 
   @CreateDateColumn()
   created_at: Date;
 
-  //   @ManyToOne(() => User, (user) => user.id)
-  //   @JoinColumn({ name: 'user_id' })
-  //   user: User;
+  @ManyToOne(() => Users, (user) => user.replies)
+  @JoinColumn({ name: 'user_id' })
+  user: Users;
 
-  @ManyToOne(() => Posts, (post) => post.replies, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Posts, (post) => post.replies)
   @JoinColumn({ name: 'post_id' })
   post: Posts;
 
-  @ManyToOne(() => Reply, (reply) => reply.reply, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Reply, (reply) => reply.reply)
   @JoinColumn({ name: 'reply_id' })
   reply: Reply;
 }
