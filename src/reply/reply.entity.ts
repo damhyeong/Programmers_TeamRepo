@@ -32,11 +32,17 @@ export class Reply {
   //   @JoinColumn({ name: 'user_id' })
   //   user: User;
 
-  @ManyToOne(() => Posts, (post) => post.replies)
+  @ManyToOne(() => Posts, (post) => post.replies, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'post_id' })
   post: Posts;
 
-  @ManyToOne(() => Reply, (reply) => reply.reply)
+  @ManyToOne(() => Reply, (reply) => reply.reply, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'reply_id' })
   reply: Reply;
 }

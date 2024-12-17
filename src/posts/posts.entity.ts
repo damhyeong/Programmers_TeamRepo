@@ -34,7 +34,10 @@ export class Posts {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToOne(() => Meeting, (meeting) => meeting.id)
+  @ManyToOne(() => Meeting, (meeting) => meeting.id, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'meeting_id' })
   meeting: Meeting;
 

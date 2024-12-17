@@ -46,7 +46,10 @@ export class Meeting {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToOne(() => Topic, (topic) => topic.id)
+  @ManyToOne(() => Topic, (topic) => topic.id, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'topic_id' })
   topic: Topic;
 
