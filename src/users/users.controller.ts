@@ -73,6 +73,10 @@ export class UsersController {
   @ApiBody({
     type: LoginDto,
   })
+  @ApiResponse({
+    status : HttpStatus.CREATED,
+    example : "asdhlfjkhasdl%^%*&^%&*askldfjzcnmv^.....",
+  })
   async login(@Body() loginDto: LoginDto) {
     const { access_token } = await this.usersService.userLogin(loginDto);
 
