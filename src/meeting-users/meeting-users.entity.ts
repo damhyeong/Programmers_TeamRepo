@@ -30,7 +30,7 @@ export class MeetingUsers {
   @JoinColumn({ name: 'meeting_id' })
   meeting: Meeting;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => Users, (user) => user.meeting_users)
   @JoinColumn({ name: 'user_id' })
   user: Users;
 }
