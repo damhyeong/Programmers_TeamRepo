@@ -1,31 +1,51 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Posts } from './posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePostDTO } from './dto/create-post.dto';
 import { ModifyPostDTO } from './dto/modify-post.dto';
+import { AuthService } from 'src/auth/auth.service';
+import { LIMIT } from 'src/common/constant/page';
+import { MeetingService } from 'src/meeting/meeting.service';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(Posts) private postRepository: Repository<Posts>,
+    private readonly authService: AuthService,
+    private readonly meetingService: MeetingService,
   ) {}
 
-  async createPost(data: CreatePostDTO): Promise<Posts> {
-    const post = this.postRepository.create(data);
+  async createPost(token: string, data: CreatePostDTO): Promise<Posts> {
+    const { sub } = await this.authService.verifyToken(token);
+    await this.meetingService.findMeeting({ id: data.meeting_id });
+
+    const post = this.postRepository.create({ user_id: sub, ...data });
 
     return await this.postRepository.save(post);
   }
 
-  async getManyPost(where?: { meeting_id?: number }) {
-    const query = where?.meeting_id
-      ? { meeting_id: where.meeting_id }
-      : undefined;
+  async getManyPost(where: { meeting_id: number; page: number }) {
+    const SKIP = (where.page - 1) * LIMIT;
+    const query = { meeting_id: where.meeting_id };
 
-    return await this.postRepository.find({
+    const [data, total] = await this.postRepository.findAndCount({
       where: query,
-      order: { id: 'ASC' },
+      take: LIMIT,
+      skip: SKIP,
+      order: { created_at: 'DESC' },
     });
+
+    return {
+      posts: data,
+      total,
+      currentPage: where.page,
+      totalPages: Math.ceil(total / LIMIT),
+    };
   }
 
   async getPost(where: { id: number }) {
@@ -43,27 +63,31 @@ export class PostsService {
   async modifyPost({
     where,
     data,
-    user_id,
+    token,
   }: {
     where: { id: number };
     data: ModifyPostDTO;
-    user_id: number;
+    token: string;
   }) {
-    await this.getPost(where);
+    const { sub } = await this.authService.verifyToken(token);
+
+    const posting = await this.getPost(where);
+    if (posting.user_id !== sub) {
+      throw new UnauthorizedException('작성자만 수정 가능합니다.');
+    }
 
     await this.postRepository.update(where, data);
 
     return { success: true };
   }
 
-  async removePost({
-    where,
-    user_id,
-  }: {
-    where: { id: number };
-    user_id: number;
-  }) {
-    await this.getPost(where);
+  async removePost({ where, token }: { where: { id: number }; token: string }) {
+    const { sub } = await this.authService.verifyToken(token);
+
+    const posting = await this.getPost(where);
+    if (posting.user_id !== sub) {
+      throw new UnauthorizedException('작성자만 삭제 가능합니다.');
+    }
 
     await this.postRepository.delete(where);
 

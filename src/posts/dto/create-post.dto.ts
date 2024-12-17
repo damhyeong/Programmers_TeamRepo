@@ -8,11 +8,6 @@ export class CreatePostDTO {
   meeting_id: number;
 
   @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  user_id: number;
-
-  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   title: string;
