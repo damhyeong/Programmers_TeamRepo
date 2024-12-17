@@ -8,23 +8,36 @@ import {
   Post,
   Put,
   Query,
+  Headers,
 } from '@nestjs/common';
-import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiHeader,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { MeetingService } from './meeting.service';
 import { Meeting } from './meeting.entity';
 import { MeetingDTO } from './dto/create-meeting.dto';
 import { FindManyMeetingDTO } from './dto/find-meeting.dto';
 
-// 토큰 적용 X 미팅 삭제, 수정 시 작성자인지 확인 해야 됨
 @ApiTags('meeting')
+@ApiBearerAuth('access-token')
 @Controller('meeting')
 export class MeetingController {
   constructor(private meetingService: MeetingService) {}
 
   @Post()
   @ApiBody({ type: MeetingDTO })
-  async postMeeting(@Body() body: MeetingDTO): Promise<Meeting> {
-    return await this.meetingService.createMeeting(body);
+  async postMeeting(
+    @Headers('authorization') token: string,
+    @Body() body: MeetingDTO,
+  ): Promise<Meeting> {
+    return await this.meetingService.createMeeting(
+      token.replace('Bearer ', ''),
+      body,
+    );
   }
 
   @Get()
@@ -40,17 +53,25 @@ export class MeetingController {
 
   @Put(':id')
   async putMeeting(
+    @Headers('authorization') token: string,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: MeetingDTO,
   ) {
     return await this.meetingService.modifyMeeting({
+      token: token.replace('Bearer ', ''),
       where: { id },
       data: body,
     });
   }
 
   @Delete(':id')
-  async deleteMeeting(@Param('id', ParseIntPipe) id: number) {
-    return await this.meetingService.removeMeeting({ id });
+  async deleteMeeting(
+    @Headers('authorization') token: string,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return await this.meetingService.removeMeeting({
+      token: token.replace('Bearer ', ''),
+      where: { id },
+    });
   }
 }
