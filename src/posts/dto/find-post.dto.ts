@@ -1,9 +1,14 @@
-import { IsOptional, IsNumber } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { IsOptional, IsNumber, IsNotEmpty } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class FindManyPostDTO {
-  @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value, 10) : undefined))
+  @IsNotEmpty()
   @IsNumber()
-  meeting_id?: number;
+  @Type(() => Number)
+  meeting_id: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  page: number;
 }
