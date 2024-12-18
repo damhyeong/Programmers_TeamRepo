@@ -156,4 +156,9 @@ export class UsersController {
       data: body
     });
   }
+
+  @Get('/me')
+  async getUser(@Headers('authorization') token: string) {
+    return await this.usersService.fetchUser(token.replace('Bearer ', ''));
+  }
 }
