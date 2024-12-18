@@ -26,11 +26,15 @@ import { LoginDto } from './dto/login.dto';
 import { PayloadDto } from '../auth/dto/payload.dto';
 import { JwtHeaderTestDto } from './dto/jwt-header-test.dto';
 import { ResponsePayloadDto } from '../auth/dto/response-payload.dto';
+import { AuthService } from "../auth/auth.service";
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private authService : AuthService
+  ) {}
 
   @Post('/email-check')
   @HttpCode(HttpStatus.OK)
@@ -94,9 +98,12 @@ export class UsersController {
     const { access_token, error } = await this.usersService.userLogin(loginDto);
 
     if (access_token) {
+      const user_info = await this.authService.verifyToken(access_token);
+
       return {
         message: '로그인 성공했습니다.',
         access_token: access_token,
+        user_info : user_info
       };
     } else {
       throw error;
