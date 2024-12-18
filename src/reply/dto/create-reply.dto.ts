@@ -8,11 +8,6 @@ export class CreateReplyDTO {
   post_id: number;
 
   @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  user_id: number;
-
-  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   content: string;

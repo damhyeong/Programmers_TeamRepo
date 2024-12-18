@@ -23,6 +23,9 @@ export class Reply {
   @Column({ nullable: true })
   reply_id?: number;
 
+  @Column({ default: true })
+  is_show: boolean;
+
   @Column({ type: 'text' })
   content: string;
 

@@ -41,9 +41,4 @@ export class MeetingDTO {
   @IsString()
   @IsNotEmpty()
   age_condition: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  owner_user_id: number;
 }

@@ -1,13 +1,45 @@
-import { Module } from '@nestjs/common';
+import {
+  forwardRef,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { MeetingController } from './meeting.controller';
 import { MeetingService } from './meeting.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Meeting } from './meeting.entity';
+import { JwtMiddleware } from 'src/common/middleware/jwt.middleware';
+import { AuthModule } from 'src/auth/auth.module';
+import { PostsModule } from 'src/posts/posts.module';
+import { MeetingUsersModule } from 'src/meeting-users/meeting-users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Meeting])],
+  imports: [
+    TypeOrmModule.forFeature([Meeting]),
+    AuthModule,
+    forwardRef(() => PostsModule),
+    MeetingUsersModule,
+  ],
   controllers: [MeetingController],
   providers: [MeetingService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, MeetingService],
 })
-export class MeetingModule {}
+export class MeetingModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(JwtMiddleware).forRoutes(
+      {
+        path: 'meeting',
+        method: RequestMethod.POST,
+      },
+      {
+        path: 'meeting/:id',
+        method: RequestMethod.PUT,
+      },
+      {
+        path: 'meeting/:id',
+        method: RequestMethod.DELETE,
+      },
+    );
+  }
+}
