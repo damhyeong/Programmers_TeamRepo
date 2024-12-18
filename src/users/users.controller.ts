@@ -2,11 +2,11 @@ import {
   Body,
   Controller,
   Get,
-  Header,
   HttpException,
   HttpStatus,
   Request,
   Post,
+  Put,
   Req,
   Res,
   HttpCode,
@@ -23,9 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { LoginDto } from './dto/login.dto';
-import { PayloadDto } from '../auth/dto/payload.dto';
-import { JwtHeaderTestDto } from './dto/jwt-header-test.dto';
 import { ResponsePayloadDto } from '../auth/dto/response-payload.dto';
+import { ModifyUserDTO } from './dto/modify-user.dto';
 import { AuthService } from "../auth/auth.service";
 
 @ApiTags('users')
@@ -137,7 +136,25 @@ export class UsersController {
     }
   }
 
+  @Get(':id/meeting')
+  async getManyMeeting(@Headers('authorization') token: string) {
+    return await this.usersService.findManyMeeting(
+      token.replace('Bearer ', ''),
+    );
+  }
+
   @ApiBearerAuth('access-token')
+  @ApiBody({ type: ModifyUserDTO })
+  @Put('/me')
+  async putUser(
+    @Headers('authorization') token: string,
+    @Body() body: ModifyUserDTO,
+  ) {
+    return await this.usersService.modifyUser({
+      token: token.replace('Bearer ', ''),
+      data: body,
+    });
+      
   @Get('/me')
   async getUser(@Headers('authorization') token: string) {
     return await this.usersService.fetchUser(token.replace('Bearer ', ''));

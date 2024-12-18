@@ -22,7 +22,18 @@ export class PostsService {
 
   async createPost(token: string, data: CreatePostDTO): Promise<Posts> {
     const { sub } = await this.authService.verifyToken(token);
-    await this.meetingService.findMeeting({ id: data.meeting_id });
+    const meeting = await this.meetingService.findMeeting({
+      id: data.meeting_id,
+    });
+
+    const meetingUser = meeting.meeting_users.find(
+      (user) => user.user_id === sub,
+    );
+    if (!meetingUser || !meetingUser.is_active) {
+      throw new UnauthorizedException(
+        '퇴출된 사용자입니다. 글을 작성할 수 없습니다.',
+      );
+    }
 
     const post = this.postRepository.create({ user_id: sub, ...data });
 
