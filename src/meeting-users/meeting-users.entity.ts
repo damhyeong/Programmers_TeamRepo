@@ -3,17 +3,14 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  CreateDateColumn,
   JoinColumn,
-  OneToMany,
 } from 'typeorm';
 
-import { Meeting } from 'src/meeting/meeting.entity';
-import { Reply } from 'src/reply/reply.entity';
 import { Users } from 'src/users/entity/users.entity';
+import { Meeting } from 'src/meeting/meeting.entity';
 
 @Entity()
-export class Posts {
+export class MeetingUsers {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,19 +20,13 @@ export class Posts {
   @Column()
   user_id: number;
 
-  @Column()
-  title: string;
+  @Column({ default: 'member' })
+  role: string;
 
-  @Column({ type: 'text' })
-  img: string;
+  @Column({ default: true })
+  is_active: boolean;
 
-  @Column({ type: 'text' })
-  content: string;
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @ManyToOne(() => Meeting, (meeting) => meeting.posts, {
+  @ManyToOne(() => Meeting, (meeting) => meeting.meeting_users, {
     nullable: false,
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
@@ -43,14 +34,11 @@ export class Posts {
   @JoinColumn({ name: 'meeting_id' })
   meeting: Meeting;
 
-  @ManyToOne(() => Users, (user) => user.posts, {
+  @ManyToOne(() => Users, (user) => user.meeting_users, {
     nullable: false,
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
   })
   @JoinColumn({ name: 'user_id' })
   user: Users;
-
-  @OneToMany(() => Reply, (reply) => reply.post)
-  replies: Reply[];
 }
