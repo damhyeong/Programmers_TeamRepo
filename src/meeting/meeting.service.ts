@@ -61,7 +61,7 @@ export class MeetingService {
       take: LIMIT,
       skip: SKIP,
       order: { created_at: 'DESC' },
-      relations: ['posts'],
+      relations: ['posts', 'topic'],
     });
 
     return {
