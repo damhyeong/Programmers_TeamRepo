@@ -12,4 +12,8 @@ export class TopicService {
   async findManyTopic() {
     return await this.topicRepository.find({ order: { id: 'ASC' } });
   }
+
+  async findTopic(where : {id : number}) {
+    return await this.topicRepository.findOne({where});
+  }
 }
