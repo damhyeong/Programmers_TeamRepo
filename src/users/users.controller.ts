@@ -2,22 +2,26 @@ import {
   Body,
   Controller,
   Get,
-  Header,
   HttpException,
   HttpStatus,
   Request,
   Post,
-  Req,
-  Res,
+  Headers,
+  Put,
 } from '@nestjs/common';
 import { EmailCheckDto } from './dto/email-check.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { ApiBody, ApiHeader, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiHeader,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { LoginDto } from './dto/login.dto';
-import { PayloadDto } from '../auth/dto/payload.dto';
-import { JwtHeaderTestDto } from './dto/jwt-header-test.dto';
 import { ResponsePayloadDto } from '../auth/dto/response-payload.dto';
+import { ModifyUserDTO } from './dto/modify-user.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -74,8 +78,8 @@ export class UsersController {
     type: LoginDto,
   })
   @ApiResponse({
-    status : HttpStatus.CREATED,
-    example : "asdhlfjkhasdl%^%*&^%&*askldfjzcnmv^.....",
+    status: HttpStatus.CREATED,
+    example: 'asdhlfjkhasdl%^%*&^%&*askldfjzcnmv^.....',
   })
   async login(@Body() loginDto: LoginDto) {
     const { access_token } = await this.usersService.userLogin(loginDto);
@@ -118,5 +122,26 @@ export class UsersController {
         HttpStatus.NOT_ACCEPTABLE,
       );
     }
+  }
+
+  @ApiBearerAuth('access-token')
+  @Get(':id/meeting')
+  async getManyMeeting(@Headers('authorization') token: string) {
+    return await this.usersService.findManyMeeting(
+      token.replace('Bearer ', ''),
+    );
+  }
+
+  @ApiBearerAuth('access-token')
+  @ApiBody({ type: ModifyUserDTO })
+  @Put('/me')
+  async putUser(
+    @Headers('authorization') token: string,
+    @Body() body: ModifyUserDTO,
+  ) {
+    return await this.usersService.modifyUser({
+      token: token.replace('Bearer ', ''),
+      data: body,
+    });
   }
 }

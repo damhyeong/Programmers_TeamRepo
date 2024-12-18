@@ -17,6 +17,7 @@ import { MeetingDTO } from './dto/create-meeting.dto';
 import { FindManyMeetingDTO } from './dto/find-meeting.dto';
 import { MeetingUsersService } from 'src/meeting-users/meeting-users.service';
 import { AuthService } from 'src/auth/auth.service';
+import { DeleteMeetingUserDTO } from 'src/meeting-users/dto/delete-meeting-users.dto';
 
 @ApiTags('meeting')
 @ApiBearerAuth('access-token')
@@ -91,6 +92,20 @@ export class MeetingController {
     return await this.meetingService.removeMeeting({
       token: token.replace('Bearer ', ''),
       where: { id },
+    });
+  }
+
+  @Delete(':id/users')
+  @ApiBody({ type: DeleteMeetingUserDTO })
+  async deleteMeetingUser(
+    @Headers('authorization') token: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() { user_id }: { user_id: number },
+  ) {
+    return await this.meetingUserService.removeMeetingUser({
+      user_id,
+      meeting_id: id,
+      token: token.replace('Bearer ', ''),
     });
   }
 }

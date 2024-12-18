@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './entity/users.entity';
 import { Repository } from 'typeorm';
@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { AuthService } from '../auth/auth.service';
 import { PayloadDto } from '../auth/dto/payload.dto';
+import { ModifyUserDTO } from './dto/modify-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -65,5 +66,38 @@ export class UsersService {
     }
 
     return result;
+  }
+
+  async findManyMeeting(token: string) {
+    const { sub } = await this.authService.verifyToken(token);
+
+    const user = await this.usersRepository.findOne({
+      where: { id: sub },
+      relations: ['meetings'],
+    });
+
+    const { password, ...data } = user;
+    return {
+      user: data,
+      meetings: user.meetings,
+    };
+  }
+
+  async findUser(where: { id: number }) {
+    const user = await this.usersRepository.find({ where });
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return user;
+  }
+
+  async modifyUser({ token, data }: { token: string; data: ModifyUserDTO }) {
+    const { sub } = await this.authService.verifyToken(token);
+    await this.findUser({ id: sub });
+
+    await this.usersRepository.update({ id: sub }, data);
+
+    return { success: true };
   }
 }
