@@ -23,7 +23,7 @@ export class JwtMiddleware implements NestMiddleware {
       console.log(error);
 
       throw new UnauthorizedException({
-        message : "토큰 기한 만료"
+        message : "토큰 기한 만료 or 토큰의 형태가 망가짐."
       });
     }
 
