@@ -25,14 +25,14 @@ import { UsersService } from './users.service';
 import { LoginDto } from './dto/login.dto';
 import { ResponsePayloadDto } from '../auth/dto/response-payload.dto';
 import { ModifyUserDTO } from './dto/modify-user.dto';
-import { AuthService } from "../auth/auth.service";
+import { AuthService } from '../auth/auth.service';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(
     private usersService: UsersService,
-    private authService : AuthService
+    private authService: AuthService,
   ) {}
 
   @Post('/email-check')
@@ -102,7 +102,7 @@ export class UsersController {
       return {
         message: '로그인 성공했습니다.',
         access_token: access_token,
-        user_info : user_info
+        user_info: user_info,
       };
     } else {
       throw error;
@@ -154,7 +154,8 @@ export class UsersController {
       token: token.replace('Bearer ', ''),
       data: body,
     });
-      
+  }
+
   @Get('/me')
   async getUser(@Headers('authorization') token: string) {
     return await this.usersService.fetchUser(token.replace('Bearer ', ''));
