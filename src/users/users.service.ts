@@ -66,4 +66,16 @@ export class UsersService {
 
     return result;
   }
+
+  async fetchUser(token: string) {
+    const { sub } = await this.authService.verifyToken(token);
+    const user = await this.usersRepository.findOne({ where: { id: sub } });
+    if (!user) {
+      throw new BadRequestException('사용자가 존재하지 않습니다.');
+    }
+
+    const { password, ...data } = user;
+
+    return data;
+  }
 }

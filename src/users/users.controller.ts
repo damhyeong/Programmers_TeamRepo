@@ -10,10 +10,17 @@ import {
   Req,
   Res,
   HttpCode,
+  Headers,
 } from '@nestjs/common';
 import { EmailCheckDto } from './dto/email-check.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { ApiBody, ApiHeader, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiHeader,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { LoginDto } from './dto/login.dto';
 import { PayloadDto } from '../auth/dto/payload.dto';
@@ -124,5 +131,11 @@ export class UsersController {
         HttpStatus.NOT_ACCEPTABLE,
       );
     }
+  }
+
+  @ApiBearerAuth('access-token')
+  @Get('/me')
+  async getUser(@Headers('authorization') token: string) {
+    return await this.usersService.fetchUser(token.replace('Bearer ', ''));
   }
 }
