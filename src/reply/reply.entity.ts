@@ -49,7 +49,7 @@ export class Reply {
   post: Posts;
 
   @ManyToOne(() => Reply, (reply) => reply.reply, {
-    nullable: false,
+    nullable: true,
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
   })
