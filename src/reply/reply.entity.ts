@@ -32,15 +32,27 @@ export class Reply {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToOne(() => Users, (user) => user.replies)
+  @ManyToOne(() => Users, (user) => user.replies, {
+    nullable: false,
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'user_id' })
   user: Users;
 
-  @ManyToOne(() => Posts, (post) => post.replies)
+  @ManyToOne(() => Posts, (post) => post.replies, {
+    nullable: false,
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'post_id' })
   post: Posts;
 
-  @ManyToOne(() => Reply, (reply) => reply.reply)
+  @ManyToOne(() => Reply, (reply) => reply.reply, {
+    nullable: true,
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'reply_id' })
   reply: Reply;
 }

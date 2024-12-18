@@ -48,14 +48,22 @@ export class Meeting {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToOne(() => Topic, (topic) => topic.id)
+  @ManyToOne(() => Topic, (topic) => topic.id, {
+    nullable: false,
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'topic_id' })
   topic: Topic;
 
   @OneToMany(() => Posts, (post) => post.meeting)
   posts: Posts[];
 
-  @ManyToOne(() => Users, (user) => user.meetings)
+  @ManyToOne(() => Users, (user) => user.meetings, {
+    nullable: false,
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'owner_user_id' })
   user: Users;
 

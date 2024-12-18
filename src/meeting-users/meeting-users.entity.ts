@@ -26,11 +26,19 @@ export class MeetingUsers {
   @Column({ default: true })
   is_active: boolean;
 
-  @ManyToOne(() => Meeting, (meeting) => meeting.meeting_users)
+  @ManyToOne(() => Meeting, (meeting) => meeting.meeting_users, {
+    nullable: false,
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'meeting_id' })
   meeting: Meeting;
 
-  @ManyToOne(() => Users, (user) => user.meeting_users)
+  @ManyToOne(() => Users, (user) => user.meeting_users, {
+    nullable: false,
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
   @JoinColumn({ name: 'user_id' })
   user: Users;
 }
