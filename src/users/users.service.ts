@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './entity/users.entity';
 import { Repository } from 'typeorm';
@@ -40,12 +40,21 @@ export class UsersService {
 
   async userLogin(
     loginDto: LoginDto,
-  ): Promise<{ access_token: string | null }> {
+  ): Promise<{ access_token: string | null, error : HttpException | null }> {
     const email: string = loginDto.email;
 
     const userEntity = await this.usersRepository.findOne({
       where: { email },
     });
+
+    if(!userEntity) {
+      return {access_token : null, error : new HttpException(
+          {
+            message : "일치하는 email 이 존재하지 않습니다."
+          },
+          HttpStatus.NOT_FOUND
+        )}
+    }
 
     const isSuccess = await bcrypt.compare(
       loginDto.password,
@@ -54,6 +63,7 @@ export class UsersService {
 
     const result = {
       access_token: null,
+      error : null,
     };
 
     if (isSuccess) {
@@ -62,7 +72,14 @@ export class UsersService {
         username: userEntity.username,
         email: userEntity.email,
       };
-      result['access_token'] = await this.authService.makeAccessToken(payload);
+      result.access_token = await this.authService.makeAccessToken(payload);
+    } else {
+      result.error = new HttpException(
+        {
+          message : "비밀번호가 일치하지 않습니다."
+        },
+        HttpStatus.UNAUTHORIZED
+      )
     }
 
     return result;
@@ -99,5 +116,16 @@ export class UsersService {
     await this.usersRepository.update({ id: sub }, data);
 
     return { success: true };
+    
+    async fetchUser(token: string) {
+    const { sub } = await this.authService.verifyToken(token);
+    const user = await this.usersRepository.findOne({ where: { id: sub } });
+    if (!user) {
+      throw new BadRequestException('사용자가 존재하지 않습니다.');
+    }
+
+    const { password, ...data } = user;
+
+    return data;
   }
 }
