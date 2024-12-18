@@ -9,6 +9,7 @@ import { LoginDto } from './dto/login.dto';
 import { AuthService } from '../auth/auth.service';
 import { PayloadDto } from '../auth/dto/payload.dto';
 import { ModifyUserDTO } from './dto/modify-user.dto';
+import { AfterDeleteUserDto } from "./dto/after-delete-user.dto";
 
 @Injectable()
 export class UsersService {
@@ -50,7 +51,7 @@ export class UsersService {
     if(!userEntity) {
       return {access_token : null, error : new HttpException(
           {
-            message : "일치하는 email 이 존재하지 않습니다."
+            message : "일치하는 email 을 찾지 못했습니다."
           },
           HttpStatus.NOT_FOUND
         )}
@@ -129,5 +130,27 @@ export class UsersService {
     const { password, ...data } = user;
 
     return data;
+  }
+
+  async deleteUser(token : string) : Promise<AfterDeleteUserDto> {
+    const {sub} = await this.authService.verifyToken(token);
+
+    const user = await this.usersRepository.findOne({ where: {id : sub}});
+
+    if(!user){
+      return {
+        user : null,
+        error : new HttpException(
+          {
+            message : "삭제하려는 유저가 존재하지 않습니다."
+          },
+          HttpStatus.NOT_FOUND
+        )
+      }
+    }
+
+    const removedUser = await this.usersRepository.remove(user);
+
+    return {user : removedUser, error : null}
   }
 }

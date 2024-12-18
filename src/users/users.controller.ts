@@ -10,11 +10,12 @@ import {
   Req,
   Res,
   HttpCode,
-  Headers
+  Headers, Delete
 } from "@nestjs/common";
 import { EmailCheckDto } from "./dto/email-check.dto";
 import { SignUpDto } from "./dto/sign-up.dto";
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiHeader,
@@ -46,7 +47,7 @@ export class UsersController {
     description: "사용 가능한 이메일일 때."
   })
   @ApiResponse ({
-    status: HttpStatus.OK,
+    status: HttpStatus.NOT_ACCEPTABLE,
     description: "이미 존재하는 이메일 계정이 있을 때."
   })
   async emailCheck(@Body () emailCheckDto: EmailCheckDto) {
@@ -56,7 +57,7 @@ export class UsersController {
     if (isAlreadySignup) {
       throw new HttpException (
         { message: "이미 존재하는 이메일 계정입니다." },
-        HttpStatus.OK
+        HttpStatus.NOT_ACCEPTABLE
       );
     } else {
       return { message: "사용 가능한 이메일입니다." };
@@ -68,9 +69,14 @@ export class UsersController {
     type: SignUpDto
   })
   @ApiResponse ({
+    status: HttpStatus.CREATED,
+    description: "회원가입에 성공했을 때"
+  })
+  @ApiResponse ({
     status: HttpStatus.BAD_REQUEST,
     description: "회원가입에 실패했을 때."
   })
+  @HttpCode(HttpStatus.CREATED)
   async signUp(@Body () signupDto: SignUpDto) {
     const isSuccess = await this.usersService.createUser (signupDto);
 
@@ -91,9 +97,18 @@ export class UsersController {
     type: LoginDto
   })
   @ApiResponse ({
-    status: HttpStatus.CREATED,
+    status: HttpStatus.OK,
     example: "asdhlfjkhasdl%^%*&^%&*askldfjzcnmv^....."
   })
+  @ApiResponse ({
+    status : HttpStatus.NOT_FOUND,
+    description : "해당 이메일 아이디는 존재하지 않음"
+  })
+  @ApiResponse ({
+    status : HttpStatus.UNAUTHORIZED,
+    description : "비밀번호가 일치하지 않음."
+  })
+  @HttpCode(HttpStatus.OK)
   async login(@Body () loginDto: LoginDto) {
     const { access_token, error } = await this.usersService.userLogin (loginDto);
 
@@ -137,6 +152,7 @@ export class UsersController {
     }
   }
 
+  @ApiBearerAuth("access-token")
   @Get (":id/meeting")
   async getManyMeeting(@Headers ("authorization") token: string) {
     return await this.usersService.findManyMeeting (
@@ -147,18 +163,46 @@ export class UsersController {
   @ApiBearerAuth ("access-token")
   @ApiBody ({ type: ModifyUserDTO })
   @Put ("/me")
+  @HttpCode(HttpStatus.ACCEPTED)
   async putUser(
     @Headers ("authorization") token: string,
     @Body () body: ModifyUserDTO
   ) {
+
+
     return await this.usersService.modifyUser ({
       token: token.replace ("Bearer ", ""),
       data: body
     });
   }
 
+  @ApiBearerAuth ("access-token")
+  @HttpCode(HttpStatus.OK)
   @Get('/me')
   async getUser(@Headers('authorization') token: string) {
     return await this.usersService.fetchUser(token.replace('Bearer ', ''));
+  }
+
+  @ApiBearerAuth ("access-token")
+  @ApiResponse({
+    status : HttpStatus.ACCEPTED,
+    description : "유저가 사이트를 탈퇴하는데 성공!"
+  })
+  @ApiResponse({
+    status : HttpStatus.NOT_FOUND,
+    description : "JWT 페이로드에 포함된 user 의 id 가 데이터베이스에 존재하지 않을 때 발생하는 에러"
+  })
+  @ApiResponse({
+    status : HttpStatus.UNAUTHORIZED,
+    description : "JWT 검증 미들웨어에서 걸러졌으므로, 형태가 망가졌거나 기한이 끝났기에 나오는 에러"
+  })
+  @Delete ('/me')
+  @HttpCode(HttpStatus.ACCEPTED)
+  async deleteUser(@Headers('authorization') token : string) {
+    const {user, error} =  await this.usersService.deleteUser(token.replace('Bearer ', ''));
+
+    return !user ? error : {
+      message : "그동안 서비스를 이용해주셔서 감사합니다."
+    }
   }
 }
