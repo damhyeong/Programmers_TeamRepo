@@ -9,10 +9,18 @@ import {
   Post,
   Req,
   Res,
+  HttpCode,
+  Headers,
 } from '@nestjs/common';
 import { EmailCheckDto } from './dto/email-check.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { ApiBody, ApiHeader, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiHeader,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { LoginDto } from './dto/login.dto';
 import { PayloadDto } from '../auth/dto/payload.dto';
@@ -25,11 +33,16 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Post('/email-check')
+  @HttpCode(HttpStatus.OK)
   @ApiBody({
     type: EmailCheckDto,
   })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+    status: HttpStatus.OK,
+    description: '사용 가능한 이메일일 때.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
     description: '이미 존재하는 이메일 계정이 있을 때.',
   })
   async emailCheck(@Body() emailCheckDto: EmailCheckDto) {
@@ -39,7 +52,7 @@ export class UsersController {
     if (isAlreadySignup) {
       throw new HttpException(
         { message: '이미 존재하는 이메일 계정입니다.' },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.OK,
       );
     } else {
       return { message: '사용 가능한 이메일입니다.' };
@@ -74,8 +87,8 @@ export class UsersController {
     type: LoginDto,
   })
   @ApiResponse({
-    status : HttpStatus.CREATED,
-    example : "asdhlfjkhasdl%^%*&^%&*askldfjzcnmv^.....",
+    status: HttpStatus.CREATED,
+    example: 'asdhlfjkhasdl%^%*&^%&*askldfjzcnmv^.....',
   })
   async login(@Body() loginDto: LoginDto) {
     const { access_token } = await this.usersService.userLogin(loginDto);
@@ -88,7 +101,7 @@ export class UsersController {
     } else {
       throw new HttpException(
         { message: '로그인 실패했습니다.' },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNAUTHORIZED,
       );
     }
   }
@@ -118,5 +131,11 @@ export class UsersController {
         HttpStatus.NOT_ACCEPTABLE,
       );
     }
+  }
+
+  @ApiBearerAuth('access-token')
+  @Get('/me')
+  async getUser(@Headers('authorization') token: string) {
+    return await this.usersService.fetchUser(token.replace('Bearer ', ''));
   }
 }
