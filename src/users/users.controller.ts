@@ -169,7 +169,6 @@ export class UsersController {
     @Body () body: ModifyUserDTO
   ) {
 
-
     return await this.usersService.modifyUser ({
       token: token.replace ("Bearer ", ""),
       data: body
