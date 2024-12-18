@@ -10,154 +10,150 @@ import {
   Req,
   Res,
   HttpCode,
-  Headers,
-} from '@nestjs/common';
-import { EmailCheckDto } from './dto/email-check.dto';
-import { SignUpDto } from './dto/sign-up.dto';
+  Headers
+} from "@nestjs/common";
+import { EmailCheckDto } from "./dto/email-check.dto";
+import { SignUpDto } from "./dto/sign-up.dto";
 import {
   ApiBearerAuth,
   ApiBody,
   ApiHeader,
   ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { UsersService } from './users.service';
-import { LoginDto } from './dto/login.dto';
-import { ResponsePayloadDto } from '../auth/dto/response-payload.dto';
-import { ModifyUserDTO } from './dto/modify-user.dto';
-import { AuthService } from '../auth/auth.service';
+  ApiTags
+} from "@nestjs/swagger";
+import { UsersService } from "./users.service";
+import { LoginDto } from "./dto/login.dto";
+import { ResponsePayloadDto } from "../auth/dto/response-payload.dto";
+import { ModifyUserDTO } from "./dto/modify-user.dto";
+import { AuthService } from "../auth/auth.service";
 
-@ApiTags('users')
-@Controller('users')
+@ApiTags ("users")
+@Controller ("users")
 export class UsersController {
   constructor(
     private usersService: UsersService,
-    private authService: AuthService,
-  ) {}
+    private authService: AuthService
+  ) {
+  }
 
-  @Post('/email-check')
-  @HttpCode(HttpStatus.OK)
-  @ApiBody({
-    type: EmailCheckDto,
+  @Post ("/email-check")
+  @HttpCode (HttpStatus.OK)
+  @ApiBody ({
+    type: EmailCheckDto
   })
-  @ApiResponse({
+  @ApiResponse ({
     status: HttpStatus.OK,
-    description: '사용 가능한 이메일일 때.',
+    description: "사용 가능한 이메일일 때."
   })
-  @ApiResponse({
+  @ApiResponse ({
     status: HttpStatus.OK,
-    description: '이미 존재하는 이메일 계정이 있을 때.',
+    description: "이미 존재하는 이메일 계정이 있을 때."
   })
-  async emailCheck(@Body() emailCheckDto: EmailCheckDto) {
+  async emailCheck(@Body () emailCheckDto: EmailCheckDto) {
     const isAlreadySignup =
-      await this.usersService.isAlreadySignup(emailCheckDto);
+      await this.usersService.isAlreadySignup (emailCheckDto);
 
     if (isAlreadySignup) {
-      throw new HttpException(
-        { message: '이미 존재하는 이메일 계정입니다.' },
-        HttpStatus.OK,
+      throw new HttpException (
+        { message: "이미 존재하는 이메일 계정입니다." },
+        HttpStatus.OK
       );
     } else {
-      return { message: '사용 가능한 이메일입니다.' };
+      return { message: "사용 가능한 이메일입니다." };
     }
   }
 
-  @Post('/signup')
-  @ApiBody({
-    type: SignUpDto,
+  @Post ("/signup")
+  @ApiBody ({
+    type: SignUpDto
   })
-  @ApiResponse({
+  @ApiResponse ({
     status: HttpStatus.BAD_REQUEST,
-    description: '회원가입에 실패했을 때.',
+    description: "회원가입에 실패했을 때."
   })
-  async signUp(@Body() signupDto: SignUpDto) {
-    const isSuccess = await this.usersService.createUser(signupDto);
+  async signUp(@Body () signupDto: SignUpDto) {
+    const isSuccess = await this.usersService.createUser (signupDto);
 
     if (isSuccess) {
-      return { message: '회원가입 성공했습니다.' };
+      return { message: "회원가입 성공했습니다." };
     } else {
-      throw new HttpException(
+      throw new HttpException (
         {
-          message: '회원가입에 실패했습니다.',
+          message: "회원가입에 실패했습니다."
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       );
     }
   }
 
-  @Post('/login')
-  @ApiBody({
-    type: LoginDto,
+  @Post ("/login")
+  @ApiBody ({
+    type: LoginDto
   })
-  @ApiResponse({
+  @ApiResponse ({
     status: HttpStatus.CREATED,
-    example: 'asdhlfjkhasdl%^%*&^%&*askldfjzcnmv^.....',
+    example: "asdhlfjkhasdl%^%*&^%&*askldfjzcnmv^....."
   })
-  async login(@Body() loginDto: LoginDto) {
-    const { access_token, error } = await this.usersService.userLogin(loginDto);
+  async login(@Body () loginDto: LoginDto) {
+    const { access_token, error } = await this.usersService.userLogin (loginDto);
 
     if (access_token) {
-      const user_info = await this.authService.verifyToken(access_token);
+      const user_info = await this.authService.verifyToken (access_token);
 
       return {
-        message: '로그인 성공했습니다.',
+        message: "로그인 성공했습니다.",
         access_token: access_token,
-        user_info: user_info,
+        user_info: user_info
       };
     } else {
       throw error;
     }
   }
 
-  @Get('/jwt-test')
-  @ApiHeader({
-    name: 'Authorization',
-    example: 'Bearer xxxxxxxxxxxxxxTokenValuexxxxxxx',
-    description: 'JWT 검증시 꼭 필요한 속성.',
+  @Get ("/jwt-test")
+  @ApiHeader ({
+    name: "Authorization",
+    example: "Bearer xxxxxxxxxxxxxxTokenValuexxxxxxx",
+    description: "JWT 검증시 꼭 필요한 속성."
   })
-  @ApiResponse({
+  @ApiResponse ({
     type: ResponsePayloadDto,
-    description: '페이로드에 더 필요한 내용 있으시면 말씀해 주세요.(공담형)',
+    description: "페이로드에 더 필요한 내용 있으시면 말씀해 주세요.(공담형)"
   })
-  async jwtTest(@Request() req: Request) {
-    const user = req['user'];
+  async jwtTest(@Request () req: Request) {
+    const user = req["user"];
 
     // 미들웨어에서 "req['user']" 로 내부 파라미터의 정보를 담아놓음.
     if (user) {
       return user;
     } else {
-      throw new HttpException(
+      throw new HttpException (
         {
           message:
-            '미들웨어 부분에서 에러를 잡아내지 못함. - 나온다면 즉시! 백엔드 연락 요망(공담형)',
+            "미들웨어 부분에서 에러를 잡아내지 못함. - 나온다면 즉시! 백엔드 연락 요망(공담형)"
         },
-        HttpStatus.NOT_ACCEPTABLE,
+        HttpStatus.NOT_ACCEPTABLE
       );
     }
   }
 
-  @Get(':id/meeting')
-  async getManyMeeting(@Headers('authorization') token: string) {
-    return await this.usersService.findManyMeeting(
-      token.replace('Bearer ', ''),
+  @Get (":id/meeting")
+  async getManyMeeting(@Headers ("authorization") token: string) {
+    return await this.usersService.findManyMeeting (
+      token.replace ("Bearer ", "")
     );
   }
 
-  @ApiBearerAuth('access-token')
-  @ApiBody({ type: ModifyUserDTO })
-  @Put('/me')
+  @ApiBearerAuth ("access-token")
+  @ApiBody ({ type: ModifyUserDTO })
+  @Put ("/me")
   async putUser(
-    @Headers('authorization') token: string,
-    @Body() body: ModifyUserDTO,
+    @Headers ("authorization") token: string,
+    @Body () body: ModifyUserDTO
   ) {
-    return await this.usersService.modifyUser({
-      token: token.replace('Bearer ', ''),
-      data: body,
+    return await this.usersService.modifyUser ({
+      token: token.replace ("Bearer ", ""),
+      data: body
     });
-  }
-
-  @Get('/me')
-  async getUser(@Headers('authorization') token: string) {
-    return await this.usersService.fetchUser(token.replace('Bearer ', ''));
   }
 }

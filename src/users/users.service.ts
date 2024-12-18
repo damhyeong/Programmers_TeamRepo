@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './entity/users.entity';
 import { Repository } from 'typeorm';
@@ -46,23 +40,20 @@ export class UsersService {
 
   async userLogin(
     loginDto: LoginDto,
-  ): Promise<{ access_token: string | null; error: HttpException | null }> {
+  ): Promise<{ access_token: string | null, error : HttpException | null }> {
     const email: string = loginDto.email;
 
     const userEntity = await this.usersRepository.findOne({
       where: { email },
     });
 
-    if (!userEntity) {
-      return {
-        access_token: null,
-        error: new HttpException(
+    if(!userEntity) {
+      return {access_token : null, error : new HttpException(
           {
-            message: '일치하는 email 이 존재하지 않습니다.',
+            message : "일치하는 email 이 존재하지 않습니다."
           },
-          HttpStatus.NOT_FOUND,
-        ),
-      };
+          HttpStatus.NOT_FOUND
+        )}
     }
 
     const isSuccess = await bcrypt.compare(
@@ -72,7 +63,7 @@ export class UsersService {
 
     const result = {
       access_token: null,
-      error: null,
+      error : null,
     };
 
     if (isSuccess) {
@@ -85,10 +76,10 @@ export class UsersService {
     } else {
       result.error = new HttpException(
         {
-          message: '비밀번호가 일치하지 않습니다.',
+          message : "비밀번호가 일치하지 않습니다."
         },
-        HttpStatus.UNAUTHORIZED,
-      );
+        HttpStatus.UNAUTHORIZED
+      )
     }
 
     return result;
@@ -125,13 +116,14 @@ export class UsersService {
     await this.usersRepository.update({ id: sub }, data);
 
     return { success: true };
-  }
+    
 
+  }
   async fetchUser(token: string) {
     const { sub } = await this.authService.verifyToken(token);
     const user = await this.usersRepository.findOne({ where: { id: sub } });
     if (!user) {
-      throw new NotFoundException('사용자가 존재하지 않습니다.');
+      throw new BadRequestException('사용자가 존재하지 않습니다.');
     }
 
     const { password, ...data } = user;
