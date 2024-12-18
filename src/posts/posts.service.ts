@@ -38,10 +38,16 @@ export class PostsService {
       take: LIMIT,
       skip: SKIP,
       order: { created_at: 'DESC' },
+      relations: ['user'],
     });
 
+    const transformedData = data.map((post) => ({
+      ...post,
+      user: new UserDto(post.user),
+    }));
+
     return {
-      posts: data,
+      posts: transformedData,
       total,
       currentPage: where.page,
       totalPages: Math.ceil(total / LIMIT),
@@ -51,13 +57,18 @@ export class PostsService {
   async getPost(where: { id: number }) {
     const post = await this.postRepository.findOne({
       where,
-      relations: ['replies'],
+      relations: ['user', 'replies'],
     });
     if (!post) {
       throw new NotFoundException();
     }
 
-    return post;
+    const transformedPost = {
+      ...post,
+      user: new UserDto(post.user),
+    };
+
+    return transformedPost;
   }
 
   async modifyPost({
@@ -92,5 +103,17 @@ export class PostsService {
     await this.postRepository.delete(where);
 
     return { success: true };
+  }
+}
+
+export class UserDto {
+  id: number;
+  profile_img: string;
+  username: string;
+
+  constructor(user: Partial<UserDto>) {
+    this.id = user.id;
+    this.profile_img = user.profile_img;
+    this.username = user.username;
   }
 }

@@ -43,10 +43,16 @@ export class ReplyService {
       take: LIMIT,
       skip: SKIP,
       order: { created_at: 'DESC' },
+      relations: ['user'],
     });
 
+    const transformedData = data.map((reply) => ({
+      ...reply,
+      user: new UserDto(reply.user),
+    }));
+
     return {
-      replies: data,
+      replies: transformedData,
       total,
       currentPage: where.page,
       totalPages: Math.ceil(total / LIMIT),
@@ -54,12 +60,20 @@ export class ReplyService {
   }
 
   async getReply(where: { id: number }) {
-    const reply = await this.replyRepository.findOne({ where });
+    const reply = await this.replyRepository.findOne({
+      where,
+      relations: ['user'],
+    });
     if (!reply) {
       throw new NotFoundException();
     }
 
-    return reply;
+    const transformedPost = {
+      ...reply,
+      user: new UserDto(reply.user),
+    };
+
+    return transformedPost;
   }
 
   async modifyReply({
@@ -98,5 +112,17 @@ export class ReplyService {
     await this.replyRepository.update(where.id, { is_show: false });
 
     return { success: true };
+  }
+}
+
+export class UserDto {
+  id: number;
+  profile_img: string;
+  username: string;
+
+  constructor(user: Partial<UserDto>) {
+    this.id = user.id;
+    this.profile_img = user.profile_img;
+    this.username = user.username;
   }
 }
