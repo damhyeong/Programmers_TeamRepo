@@ -16,4 +16,4 @@ import { JwtMiddleware } from '../common/middleware/jwt.middleware';
   providers: [TopicService],
   exports: [TypeOrmModule, TopicService],
 })
-export class TopicModule implements NestModule {}
+export class TopicModule {}
