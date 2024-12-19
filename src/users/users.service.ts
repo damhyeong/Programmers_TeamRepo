@@ -139,6 +139,15 @@ export class UsersService {
       relations: ['meetings'],
     });
 
+    if(!user){
+      throw new HttpException(
+        {
+          message : "지금 JWT 페이로드에 저장된 user id 는 존재하는 유저가 아닙니다."
+        },
+        HttpStatus.NOT_FOUND
+      )
+    }
+
     const { password, ...data } = user;
     return {
       user: data,
