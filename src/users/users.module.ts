@@ -24,15 +24,15 @@ export class UsersModule implements NestModule {
       .apply(JwtMiddleware)
       .exclude(
         {
-          path: 'email-check',
+          path: 'users/email-check',
           method: RequestMethod.POST,
         },
         {
-          path: 'signup',
+          path: 'users/signup',
           method: RequestMethod.POST,
         },
         {
-          path: 'login',
+          path: 'users/login',
           method: RequestMethod.POST,
         },
       )

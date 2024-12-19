@@ -30,7 +30,7 @@ export class MeetingModule implements NestModule {
     consumer
       .apply(JwtMiddleware)
       .exclude({
-        path: '/meeting',
+        path: 'meeting',
         method: RequestMethod.GET,
       })
       .forRoutes(MeetingController);

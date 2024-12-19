@@ -38,6 +38,10 @@ export class PostsModule implements NestModule {
           path: 'posts/:id/reply',
           method: RequestMethod.GET,
         },
+        {
+          path: 'posts/:id',
+          method: RequestMethod.GET,
+        },
       )
       .forRoutes(PostsController);
   }
