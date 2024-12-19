@@ -28,7 +28,7 @@ export class UsersModule implements NestModule {
           method: RequestMethod.POST,
         },
         {
-          path: '/signup',
+          path: 'signup',
           method: RequestMethod.POST,
         },
         {
