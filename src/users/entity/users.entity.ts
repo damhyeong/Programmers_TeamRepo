@@ -1,6 +1,7 @@
 import { MeetingUsers } from 'src/meeting-users/meeting-users.entity';
 import { Meeting } from 'src/meeting/meeting.entity';
 import { Posts } from 'src/posts/posts.entity';
+import { ReplyLikes } from 'src/reply-likes/reply-likes.entity';
 import { Reply } from 'src/reply/reply.entity';
 import {
   Column,
@@ -54,4 +55,7 @@ export class Users {
 
   @OneToMany(() => MeetingUsers, (meeting_users) => meeting_users.user)
   meeting_users: MeetingUsers[];
+
+  @OneToMany(() => ReplyLikes, (reply_likes) => reply_likes.user)
+  reply_likes: ReplyLikes[];
 }

@@ -13,12 +13,16 @@ import { ReplyService } from './reply.service';
 import { CreateReplyDTO } from './dto/create-reply.dto';
 import { Reply } from './reply.entity';
 import { ModifyReplyDTO } from './dto/modify-reply.dto';
+import { ReplyLikesService } from 'src/reply-likes/reply-likes.service';
 
 @ApiTags('replies')
 @ApiBearerAuth('access-token')
 @Controller('replies')
 export class ReplyController {
-  constructor(private replyService: ReplyService) {}
+  constructor(
+    private replyService: ReplyService,
+    private replyLikeService: ReplyLikesService,
+  ) {}
 
   @Post()
   @ApiBody({ type: CreateReplyDTO })
@@ -54,5 +58,27 @@ export class ReplyController {
       where: { id },
       token: token.replace('Bearer ', ''),
     });
+  }
+
+  @Post(':id/like')
+  async postReplyLike(
+    @Headers('authorization') token: string,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return await this.replyLikeService.createReplyLike(
+      token.replace('Bearer ', ''),
+      id,
+    );
+  }
+
+  @Delete(':id/like')
+  async deleteReplyLike(
+    @Headers('authorization') token: string,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return await this.replyLikeService.createReplyLike(
+      token.replace('Bearer ', ''),
+      id,
+    );
   }
 }
