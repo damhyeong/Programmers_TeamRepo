@@ -47,13 +47,14 @@ export class MeetingController {
     );
   }
 
+  // replaceToken 이 string | null 인데, 이상하게 내부 서비스 모듈에서 조건문을 통과하면서 jwt must be string 에러가 나고 있어서 고쳤습니다.
   @Post(':id/participation')
   async postMeetingParticipation(
     @Headers('authorization') token: string,
     @Param('id', ParseIntPipe) id: number,
   ) {
     const replaceToken = token.replace('Bearer ', '');
-    await this.meetingService.findMeeting({ id });
+    await this.meetingService.findMeeting({ id }, replaceToken);
 
     return await this.meetingUserService.createMeetingUser(replaceToken, {
       meeting_id: id,

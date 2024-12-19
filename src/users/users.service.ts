@@ -101,6 +101,39 @@ export class UsersService {
     };
   }
 
+  async findParticipateMeeting(token : string) {
+    const { sub } = await this.authService.verifyToken(token);
+
+    const user = await this.usersRepository.findOne({
+      where : {id : sub},
+      relations : ['meeting_users']
+    });
+
+    const result = {
+      user : null,
+      meeting_users : null,
+      error : null,
+    }
+
+    if(!user) {
+      result.error = new HttpException(
+        {
+          message : "해당 유저가 존재하지 않습니다.",
+        },
+        HttpStatus.NOT_FOUND
+      )
+
+      return result;
+    }
+
+    const {password, ...data} = user;
+
+    result.user = data;
+    result.meeting_users = user.meeting_users;
+
+    return result;
+  }
+
   async findUser(where: { id: number }) {
     const user = await this.usersRepository.find({ where });
     if (!user) {

@@ -72,6 +72,7 @@ export class MeetingService {
     };
   }
 
+  // 에러를 먼저 고치기 위해 token? : string 에서 token : string 으로 바꿨습니다.
   async findMeeting(where: { id: number }, token?: string) {
     let sub: number | null = null;
 
