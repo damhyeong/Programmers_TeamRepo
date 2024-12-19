@@ -16,14 +16,4 @@ import { JwtMiddleware } from '../common/middleware/jwt.middleware';
   providers: [TopicService],
   exports: [TypeOrmModule, TopicService],
 })
-export class TopicModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(JwtMiddleware)
-      .exclude({
-        path: 'topics',
-        method: RequestMethod.GET,
-      })
-      .forRoutes(TopicController);
-  }
-}
+export class TopicModule {}
