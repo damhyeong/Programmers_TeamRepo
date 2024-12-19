@@ -125,7 +125,7 @@ export class UsersService {
     const newPassword = await bcrypt.hash(changePasswordDto.target_password, 10);
 
     await this.usersRepository.update({id : sub}, {password : newPassword});
-
+    
     result.isSuccess = true;
 
     return result;

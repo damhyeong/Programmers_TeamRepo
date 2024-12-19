@@ -20,10 +20,14 @@ export class JwtMiddleware implements NestMiddleware {
 
       request["user"] = payload;
     } catch (error) {
-      console.log(error);
+      if(error.name === "TokenExpiredError"){
+        throw new UnauthorizedException(
+          {message : "토큰 기한 만료"}
+        )
+      }
 
       throw new UnauthorizedException({
-        message : "토큰 기한 만료 or 토큰의 형태가 망가짐."
+        message : "토큰의 형태가 망가짐."
       });
     }
 
