@@ -72,17 +72,31 @@ export class MeetingService {
     };
   }
 
-  async findMeeting(where: { id: number }) {
+  async findMeeting(where: { id: number }, token?: string) {
+    let sub: number | null = null;
+
+    if (token) {
+      const payload = await this.authService
+        .verifyToken(token)
+        .catch(() => null);
+      sub = payload?.sub || null;
+    }
+
     const meeting = await this.meetingRepository.findOne({
       where,
-      relations: ['meeting_users', 'meeting_users.user'],
+      relations: ['topic', 'meeting_users', 'meeting_users.user'],
     });
     if (!meeting) {
       throw new NotFoundException();
     }
 
+    const participation = meeting.meeting_users.some(
+      (meetingUser) => meetingUser.user_id === sub,
+    );
+
     const meetingUsersWithUserDTO = meeting.meeting_users.map((meetingUser) => {
       const { password, ...userWithoutPassword } = meetingUser.user;
+
       return {
         ...meetingUser,
         user: userWithoutPassword,
@@ -92,6 +106,7 @@ export class MeetingService {
     return {
       ...meeting,
       meeting_users: meetingUsersWithUserDTO,
+      participation,
     };
   }
 

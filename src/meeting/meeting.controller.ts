@@ -10,7 +10,13 @@ import {
   Query,
   Headers,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiHeader,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { MeetingService } from './meeting.service';
 import { Meeting } from './meeting.entity';
 import { MeetingDTO } from './dto/create-meeting.dto';
@@ -67,8 +73,18 @@ export class MeetingController {
   }
 
   @Get(':id')
-  async getMeeting(@Param('id', ParseIntPipe) id: number) {
-    return await this.meetingService.findMeeting({ id });
+  @ApiHeader({
+    name: 'authorization',
+    description: 'Bearer token (optional)',
+    required: false,
+  })
+  async getMeeting(
+    @Headers('authorization') token: string | undefined,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const formattedToken = token?.replace('Bearer ', '') || null;
+
+    return await this.meetingService.findMeeting({ id }, formattedToken);
   }
 
   @Put(':id')
