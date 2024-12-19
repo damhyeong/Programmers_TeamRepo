@@ -1,4 +1,5 @@
 import { Posts } from 'src/posts/posts.entity';
+import { ReplyLikes } from 'src/reply-likes/reply-likes.entity';
 import { Users } from 'src/users/entity/users.entity';
 import {
   Entity,
@@ -7,6 +8,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -55,4 +57,7 @@ export class Reply {
   })
   @JoinColumn({ name: 'reply_id' })
   reply: Reply;
+
+  @OneToMany(() => ReplyLikes, (replyLikes) => replyLikes.reply)
+  reply_likes: ReplyLikes[];
 }
