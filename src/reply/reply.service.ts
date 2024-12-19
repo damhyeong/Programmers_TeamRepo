@@ -14,6 +14,7 @@ import { ModifyReplyDTO } from './dto/modify-reply.dto';
 import { PostsService } from 'src/posts/posts.service';
 import { LIMIT } from 'src/common/constant/page';
 import { AuthService } from 'src/auth/auth.service';
+import { ReplyLikes } from 'src/reply-likes/reply-likes.entity';
 
 @Injectable()
 export class ReplyService {
@@ -43,13 +44,24 @@ export class ReplyService {
       take: LIMIT,
       skip: SKIP,
       order: { created_at: 'DESC' },
-      relations: ['user'],
+      relations: ['user', 'reply_likes', 'reply_likes.user'],
     });
 
-    const transformedData = data.map((reply) => ({
-      ...reply,
-      user: new UserDto(reply.user),
-    }));
+    const transformedData = data.map((reply) => {
+      const likes = reply.reply_likes.map((like) => ({
+        user_id: like.user.id,
+        username: like.user.username,
+        profile_img: like.user.profile_img,
+      }));
+
+      delete reply.reply_likes;
+
+      return {
+        ...reply,
+        user: new UserDto(reply.user),
+        likes,
+      };
+    });
 
     return {
       replies: transformedData,
@@ -124,5 +136,17 @@ export class UserDto {
     this.id = user.id;
     this.profile_img = user.profile_img;
     this.username = user.username;
+  }
+}
+
+export class ReplyLikeDto {
+  user_id: number;
+  username: string;
+  profile_img: string;
+
+  constructor(like: ReplyLikes) {
+    this.user_id = like.user.id;
+    this.username = like.user.username;
+    this.profile_img = like.user.profile_img;
   }
 }

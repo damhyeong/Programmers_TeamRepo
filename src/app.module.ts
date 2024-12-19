@@ -16,6 +16,8 @@ import { Posts } from './posts/posts.entity';
 import { Reply } from './reply/reply.entity';
 import { MeetingUsersModule } from './meeting-users/meeting-users.module';
 import { MeetingUsers } from './meeting-users/meeting-users.entity';
+import { ReplyLikesModule } from './reply-likes/reply-likes.module';
+import { ReplyLikes } from './reply-likes/reply-likes.entity';
 
 @Module({
   imports: [
@@ -27,7 +29,7 @@ import { MeetingUsers } from './meeting-users/meeting-users.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [Meeting, Topic, Posts, Reply, Users, MeetingUsers],
+      entities: [Meeting, Topic, Posts, Reply, Users, MeetingUsers, ReplyLikes],
       synchronize: true,
     }),
     UsersModule,
@@ -37,6 +39,7 @@ import { MeetingUsers } from './meeting-users/meeting-users.entity';
     PostsModule,
     ReplyModule,
     MeetingUsersModule,
+    ReplyLikesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
