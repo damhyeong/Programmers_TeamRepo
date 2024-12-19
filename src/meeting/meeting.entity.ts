@@ -27,19 +27,19 @@ export class Meeting {
   @Column({ type: 'text' })
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   max_members: number;
 
-  @Column()
+  @Column({ nullable: true })
   start_date: Date;
 
-  @Column()
+  @Column({ nullable: true })
   end_date: Date;
 
-  @Column()
+  @Column({ nullable: true })
   gender_condition: string;
 
-  @Column()
+  @Column({ nullable: true })
   age_condition: string;
 
   @Column()

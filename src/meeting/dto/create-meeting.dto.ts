@@ -1,4 +1,10 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class MeetingDTO {
@@ -19,26 +25,26 @@ export class MeetingDTO {
 
   @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   max_members: number;
 
   @ApiProperty()
   @IsDateString()
-  @IsNotEmpty()
+  @IsOptional()
   start_date: Date;
 
   @ApiProperty()
   @IsDateString()
-  @IsNotEmpty()
+  @IsOptional()
   end_date: Date;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   gender_condition: string;
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   age_condition: string;
 }
