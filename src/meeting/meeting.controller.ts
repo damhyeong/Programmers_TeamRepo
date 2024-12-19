@@ -52,15 +52,13 @@ export class MeetingController {
     @Headers('authorization') token: string,
     @Param('id', ParseIntPipe) id: number,
   ) {
+    const replaceToken = token.replace('Bearer ', '');
     await this.meetingService.findMeeting({ id });
 
-    return await this.meetingUserService.createMeetingUser(
-      token.replace('Bearer ', ''),
-      {
-        meeting_id: id,
-        role: 'member',
-      },
-    );
+    return await this.meetingUserService.createMeetingUser(replaceToken, {
+      meeting_id: id,
+      role: 'member',
+    });
   }
 
   @Get()
