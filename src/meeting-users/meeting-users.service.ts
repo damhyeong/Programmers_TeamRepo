@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -18,9 +17,11 @@ export class MeetingUsersService {
     private readonly authService: AuthService,
   ) {}
 
-  async createMeetingUser(user_id: number, data: MeetingUserDTO) {
+  async createMeetingUser(token: string, data: MeetingUserDTO) {
+    const { sub } = await this.authService.verifyToken(token);
+
     const meetingUser = this.meetingRepository.create({
-      user_id,
+      user_id: sub,
       ...data,
     });
     await this.meetingRepository.save(meetingUser);
