@@ -37,16 +37,16 @@ export class Posts {
 
   @ManyToOne(() => Meeting, (meeting) => meeting.posts, {
     nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'meeting_id' })
   meeting: Meeting;
 
   @ManyToOne(() => Users, (user) => user.posts, {
-    nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    nullable: true,
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
   user: Users;

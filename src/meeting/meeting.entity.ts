@@ -50,8 +50,8 @@ export class Meeting {
 
   @ManyToOne(() => Topic, (topic) => topic.id, {
     nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'topic_id' })
   topic: Topic;
@@ -60,9 +60,9 @@ export class Meeting {
   posts: Posts[];
 
   @ManyToOne(() => Users, (user) => user.meetings, {
-    nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    nullable: true,
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'owner_user_id' })
   user: Users;

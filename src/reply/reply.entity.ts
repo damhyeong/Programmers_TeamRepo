@@ -20,7 +20,7 @@ export class Reply {
   post_id: number;
 
   @Column()
-  user_id: number;
+  user_id: number | null; // 유저 삭제 시를 대비한 null
 
   @Column({ nullable: true })
   reply_id?: number;
@@ -35,28 +35,32 @@ export class Reply {
   created_at: Date;
 
   @ManyToOne(() => Users, (user) => user.replies, {
-    nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    nullable: true,
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
-  user: Users;
+  user: Users | null; // 유저는 삭제되어 정보가 없을수도 있으므로,
 
   @ManyToOne(() => Posts, (post) => post.replies, {
     nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'post_id' })
   post: Posts;
 
-  @ManyToOne(() => Reply, (reply) => reply.reply, {
+  // 해당 코드는 부모 댓글의 PK 를 다시 참조하며, 삭제가 불가능하도록 만들었습니다. - 하위 댓글 보호
+  @ManyToOne(() => Reply, (reply) => reply.childReplies, {
     nullable: true,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'reply_id' })
-  reply: Reply;
+  reply: Reply | null;
+
+  @OneToMany(() => Reply, (reply) => reply.reply)
+  childReplies : Reply[];
 
   @OneToMany(() => ReplyLikes, (replyLikes) => replyLikes.reply)
   reply_likes: ReplyLikes[];
