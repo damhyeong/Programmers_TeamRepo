@@ -160,6 +160,22 @@ export class UsersController {
     );
   }
 
+  @ApiBearerAuth("access")
+  @Get("/meetings")
+  async getParticipateMeeting(@Headers("authorization") token : string) {
+    const {user, meeting_users, error} = await this.usersService.findParticipateMeeting(token.replace("Bearer ", ""));
+
+    if(error){
+      return error;
+    }
+
+    return {
+      user : user,
+      meeting_users : meeting_users
+    }
+  }
+
+
   @ApiBearerAuth ("access-token")
   @ApiBody ({ type: ModifyUserDTO })
   @Put ("/me")
