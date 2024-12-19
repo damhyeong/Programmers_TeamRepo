@@ -10,6 +10,7 @@ import { AuthService } from '../auth/auth.service';
 import { PayloadDto } from '../auth/dto/payload.dto';
 import { ModifyUserDTO } from './dto/modify-user.dto';
 import { AfterDeleteUserDto } from "./dto/after-delete-user.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @Injectable()
 export class UsersService {
@@ -82,6 +83,50 @@ export class UsersService {
         HttpStatus.UNAUTHORIZED
       )
     }
+
+    return result;
+  }
+
+  async userChangePassword(token : string, changePasswordDto : ChangePasswordDto) {
+    const {sub} = await this.authService.replaceAndVerify(token);
+
+    let user = await this.usersRepository.findOne({where : {id : sub}});
+
+    const result = {
+      isSuccess : false,
+      error : null,
+    }
+
+    if(!user) {
+      result.error = new HttpException(
+        {
+          message : "비밀번호를 사용하려는 대상을 찾을 수 없습니다.",
+        },
+        HttpStatus.NOT_FOUND
+      )
+      return result;
+    }
+
+    const isSamePassword = await bcrypt.compare(
+      changePasswordDto.password,
+      user.password,
+    );
+
+    if(!isSamePassword) {
+      result.error = new HttpException(
+        {
+          message : "기존의 비밀번호를 잘못 입력하셨습니다."
+        },
+        HttpStatus.NOT_ACCEPTABLE
+      )
+
+      return result;
+    }
+    const newPassword = await bcrypt.hash(changePasswordDto.target_password, 10);
+
+    await this.usersRepository.update({id : sub}, {password : newPassword});
+
+    result.isSuccess = true;
 
     return result;
   }

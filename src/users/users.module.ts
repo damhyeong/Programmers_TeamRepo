@@ -20,27 +20,22 @@ import { JwtMiddleware } from '../common/middleware/jwt.middleware';
 export class UsersModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // 테스팅 라우트 컨트롤러 작성 후, 여기서 이어가기.
-    consumer.apply(JwtMiddleware).forRoutes(
-      {
-        path: 'jwt-test',
-        method: RequestMethod.GET,
-      },
-      {
-        path: 'me',
-        method: RequestMethod.PUT,
-      },
-      {
-        path: 'me',
-        method: RequestMethod.GET,
-      },
-      {
-        path: 'me',
-        method: RequestMethod.DELETE,
-      },
-      {
-        path: ':id/meeting',
-        method: RequestMethod.GET
-      },
-    );
+    consumer
+      .apply(JwtMiddleware)
+      .exclude(
+        {
+          path: 'email-check',
+          method: RequestMethod.POST,
+        },
+        {
+          path: '/signup',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'login',
+          method: RequestMethod.POST,
+        },
+      )
+      .forRoutes(UsersController);
   }
 }

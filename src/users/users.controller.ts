@@ -27,6 +27,7 @@ import { LoginDto } from "./dto/login.dto";
 import { ResponsePayloadDto } from "../auth/dto/response-payload.dto";
 import { ModifyUserDTO } from "./dto/modify-user.dto";
 import { AuthService } from "../auth/auth.service";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @ApiTags ("users")
 @Controller ("users")
@@ -125,6 +126,36 @@ export class UsersController {
     }
   }
 
+  @ApiBearerAuth("access-token")
+  @ApiBody({
+    type : ChangePasswordDto,
+    description : "원래 비밀번호, 변경하려는 비밀번호"
+  })
+  @ApiResponse({
+    status : HttpStatus.ACCEPTED,
+    description : "비밀번호 변경에 성공"
+  })
+  @ApiResponse({
+    status : HttpStatus.NOT_FOUND,
+    description : "jwt 토큰으로 주어진 페이로드 user id 로 레코드를 찾지 못함"
+  })
+  @ApiResponse({
+    status : HttpStatus.NOT_ACCEPTABLE,
+    description : "원래의 비밀번호를 잘못 입력했을 때 반환"
+  })
+  @Put('/change-password')
+  async changePassword(@Headers("authorization") token : string, @Body() changePasswordDto : ChangePasswordDto){
+    const {isSuccess, error} = await this.usersService.userChangePassword(token, changePasswordDto);
+
+    if(error){
+      throw error;
+    } else {
+      return {
+        isSuccess : isSuccess
+      }
+    }
+  }
+
   @Get ("/jwt-test")
   @ApiHeader ({
     name: "Authorization",
@@ -163,7 +194,9 @@ export class UsersController {
   @ApiBearerAuth("access")
   @Get("/meetings")
   async getParticipateMeeting(@Headers("authorization") token : string) {
-    const {user, meeting_users, error} = await this.usersService.findParticipateMeeting(token.replace("Bearer ", ""));
+    const {user, meeting_users, error} = await this.usersService.findParticipateMeeting(
+      token.replace("Bearer ", "")
+    );
 
     if(error){
       return error;
@@ -216,8 +249,12 @@ export class UsersController {
   async deleteUser(@Headers('authorization') token : string) {
     const {user, error} =  await this.usersService.deleteUser(token.replace('Bearer ', ''));
 
-    return !user ? error : {
-      message : "그동안 서비스를 이용해주셔서 감사합니다."
+    if(user){
+      throw error;
+    } else {
+      return {
+        message : "그동안 서비스를 이용해주셔서 감사합니다."
+      }
     }
   }
 }

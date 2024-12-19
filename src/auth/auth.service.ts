@@ -18,4 +18,14 @@ export class AuthService {
 
     return payload;
   }
+
+  async replaceAndVerify(token : string) {
+    const replacedToken = token.replace("Bearer ", "");
+
+    const payload = await this.jwtService.verifyAsync(replacedToken, {
+      secret: jwtConstants.secret,
+    });
+
+    return payload;
+  }
 }
