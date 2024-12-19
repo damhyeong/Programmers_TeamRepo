@@ -11,13 +11,22 @@ export class ReplyLikesService {
     private replyLikeRepository: Repository<ReplyLikes>,
     private authService: AuthService,
   ) {}
-
   async createReplyLike(token: string, reply_id: number) {
     const { sub } = await this.authService.verifyToken(token);
 
-    const data = this.replyLikeRepository.create({ user_id: sub, reply_id });
-    await this.replyLikeRepository.save(data);
+    const existingLike = await this.replyLikeRepository.findOne({
+      where: { user_id: sub, reply_id },
+    });
 
-    return { success: true };
+    if (existingLike) {
+      await this.replyLikeRepository.delete({ user_id: sub, reply_id });
+
+      return { success: true, message: 'Like removed' };
+    } else {
+      const data = this.replyLikeRepository.create({ user_id: sub, reply_id });
+      await this.replyLikeRepository.save(data);
+
+      return { success: true, message: 'Like added' };
+    }
   }
 }

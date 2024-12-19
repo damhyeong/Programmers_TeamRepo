@@ -70,4 +70,15 @@ export class ReplyController {
       id,
     );
   }
+
+  @Delete(':id/like')
+  async deleteReplyLike(
+    @Headers('authorization') token: string,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return await this.replyLikeService.createReplyLike(
+      token.replace('Bearer ', ''),
+      id,
+    );
+  }
 }
