@@ -27,19 +27,12 @@ import { MeetingUsersModule } from 'src/meeting-users/meeting-users.module';
 })
 export class MeetingModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtMiddleware).forRoutes(
-      {
-        path: 'meeting',
-        method: RequestMethod.POST,
-      },
-      {
-        path: 'meeting/:id',
-        method: RequestMethod.PUT,
-      },
-      {
-        path: 'meeting/:id',
-        method: RequestMethod.DELETE,
-      },
-    );
+    consumer
+      .apply(JwtMiddleware)
+      .exclude({
+        path: '/meeting',
+        method: RequestMethod.GET,
+      })
+      .forRoutes(MeetingController);
   }
 }
