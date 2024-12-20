@@ -36,7 +36,7 @@ export class Meeting {
   @Column({ nullable: true })
   end_date: Date;
 
-  @Column()
+  @Column({ nullable : true})
   owner_user_id: number;
 
   @CreateDateColumn()

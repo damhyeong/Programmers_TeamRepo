@@ -20,7 +20,7 @@ export class Posts {
   @Column()
   meeting_id: number;
 
-  @Column()
+  @Column({nullable : true})
   user_id: number;
 
   @Column()
@@ -36,7 +36,6 @@ export class Posts {
   created_at: Date;
 
   @ManyToOne(() => Meeting, (meeting) => meeting.posts, {
-    nullable: false,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

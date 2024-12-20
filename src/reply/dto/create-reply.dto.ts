@@ -15,5 +15,5 @@ export class CreateReplyDTO {
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
-  reply_id?: number;
+  parent_reply_id?: number;
 }
