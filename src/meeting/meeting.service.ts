@@ -19,8 +19,7 @@ export class MeetingService {
     private meetingUserService: MeetingUsersService,
   ) {}
 
-  async createMeeting(token: string, data: MeetingDTO): Promise<Meeting> {
-    const { sub } = await this.authService.verifyToken(token);
+  async createMeeting(sub: number, data: MeetingDTO): Promise<Meeting> {
 
     const meeting = this.meetingRepository.create({
       owner_user_id: sub,
