@@ -1,14 +1,21 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Like, Repository } from 'typeorm';
+import {
+  FindOptionsWhere,
+  LessThanOrEqual,
+  Like,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { Meeting } from './meeting.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MeetingDTO } from './dto/create-meeting.dto';
 import { AuthService } from 'src/auth/auth.service';
-import { LIMIT } from 'src/common/constant/page';
 import { MeetingUsersService } from 'src/meeting-users/meeting-users.service';
 
 @Injectable()
@@ -16,6 +23,7 @@ export class MeetingService {
   constructor(
     @InjectRepository(Meeting) private meetingRepository: Repository<Meeting>,
     private readonly authService: AuthService,
+    @Inject(forwardRef(() => MeetingUsersService))
     private meetingUserService: MeetingUsersService,
   ) {}
 
@@ -39,35 +47,59 @@ export class MeetingService {
     topic_id?: number;
     page: number;
     keyword?: string;
+    per_page: number;
+    availableOnly?: boolean;
+    ongoingOnly?: boolean;
   }) {
-    const SKIP = (where.page - 1) * LIMIT;
+    const SKIP = (where.page - 1) * where.per_page;
 
-    const query: any = {};
+    const conditions: FindOptionsWhere<any> = {};
+
+    // 주제 ID 필터링
     if (where?.topic_id) {
-      query.topic_id = where.topic_id;
+      conditions.topic_id = where.topic_id;
     }
 
-    const conditions: any[] = [];
+    // keyword 필터링
     if (where?.keyword) {
-      conditions.push(
-        { title: Like(`%${where.keyword}%`) },
-        { description: Like(`%${where.keyword}%`) },
-      );
+      conditions.title = Like(`%${where.keyword}%`);
+      conditions.description = Like(`%${where.keyword}%`);
+    }
+
+    // 진행 중인 미팅 필터링
+    if (where?.ongoingOnly) {
+      const today = new Date();
+
+      conditions.start_date = LessThanOrEqual(today);
+      conditions.end_date = MoreThanOrEqual(today);
     }
 
     const [data, total] = await this.meetingRepository.findAndCount({
-      where: conditions.length ? conditions : query,
-      take: LIMIT,
+      where: conditions,
+      take: where.per_page,
       skip: SKIP,
       order: { created_at: 'DESC' },
       relations: ['posts', 'topic'],
     });
 
+    // 각 미팅에 대해 활성 사용자 수를 계산하여 필터링
+    const meetingsWithActiveUserCount = [];
+    for (const meeting of data) {
+      const activeUserCount = await this.meetingUserService.countActiveUsers(
+        meeting.id,
+      );
+      if (meeting.max_members > activeUserCount) {
+        meetingsWithActiveUserCount.push({
+          ...meeting,
+        });
+      }
+    }
+
     return {
-      meeting: data,
+      meeting: meetingsWithActiveUserCount,
       total,
       currentPage: where.page,
-      totalPages: Math.ceil(total / LIMIT),
+      totalPages: Math.ceil(total / where.per_page),
     };
   }
 

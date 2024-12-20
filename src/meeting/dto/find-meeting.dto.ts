@@ -1,4 +1,10 @@
-import { IsOptional, IsNumber, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsOptional,
+  IsNumber,
+  IsNotEmpty,
+  IsString,
+  IsBoolean,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class FindManyMeetingDTO {
@@ -15,4 +21,19 @@ export class FindManyMeetingDTO {
   @IsOptional()
   @IsString()
   keyword: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  per_page: number;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  availableOnly?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  ongoingOnly?: boolean;
 }
