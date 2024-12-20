@@ -1,15 +1,16 @@
-import { Posts } from 'src/posts/posts.entity';
-import { ReplyLikes } from 'src/reply-likes/reply-likes.entity';
-import { Users } from 'src/users/entity/users.entity';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
+  Entity,
+  Index,
   JoinColumn,
+  ManyToOne,
   OneToMany,
-} from 'typeorm';
+  PrimaryGeneratedColumn
+} from "typeorm";
+import { Users } from "../users/entity/users.entity";
+import { ReplyLikes } from "../reply-likes/reply-likes.entity";
+import { Posts } from "../posts/posts.entity";
 
 @Entity()
 export class Reply {
@@ -20,9 +21,10 @@ export class Reply {
   post_id: number;
 
   @Column()
-  user_id: number | null; // 유저 삭제 시를 대비한 null
+  user_id: number;
 
   @Column({ nullable: true })
+  @Index() // reply_id에 인덱스 추가
   reply_id?: number;
 
   @Column({ default: true })
@@ -34,33 +36,36 @@ export class Reply {
   @CreateDateColumn()
   created_at: Date;
 
+  // 작성자
   @ManyToOne(() => Users, (user) => user.replies, {
     nullable: true,
-    onDelete: 'SET NULL',
+    onDelete: 'SET NULL', // 작성자 삭제 시 user_id를 NULL로 설정
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
-  user: Users | null; // 유저는 삭제되어 정보가 없을수도 있으므로,
+  user: Users;
 
+  // 게시글
   @ManyToOne(() => Posts, (post) => post.replies, {
     nullable: false,
-    onDelete: 'CASCADE',
+    onDelete: 'CASCADE', // 게시글 삭제 시 댓글도 삭제
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'post_id' })
   post: Posts;
 
-  // 해당 코드는 부모 댓글의 PK 를 다시 참조하며, 삭제가 불가능하도록 만들었습니다. - 하위 댓글 보호
+  // 부모 댓글
   @ManyToOne(() => Reply, (reply) => reply.childReplies, {
-    nullable: true,
-    onDelete: 'CASCADE',
+    nullable: true, // 루트 댓글 허용
+    onDelete: 'SET NULL', // 부모 댓글이 삭제되면 reply_id를 NULL로 설정
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'reply_id' })
   reply: Reply | null;
 
+  // 자식 댓글
   @OneToMany(() => Reply, (reply) => reply.reply)
-  childReplies : Reply[];
+  childReplies: Reply[];
 
   @OneToMany(() => ReplyLikes, (replyLikes) => replyLikes.reply)
   reply_likes: ReplyLikes[];
