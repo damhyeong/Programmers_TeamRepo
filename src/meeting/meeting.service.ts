@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -16,6 +18,7 @@ export class MeetingService {
   constructor(
     @InjectRepository(Meeting) private meetingRepository: Repository<Meeting>,
     private readonly authService: AuthService,
+    @Inject(forwardRef(() => MeetingUsersService))
     private meetingUserService: MeetingUsersService,
   ) {}
 

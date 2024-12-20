@@ -19,7 +19,7 @@ import { MeetingUsersModule } from 'src/meeting-users/meeting-users.module';
     TypeOrmModule.forFeature([Meeting]),
     AuthModule,
     forwardRef(() => PostsModule),
-    MeetingUsersModule,
+    forwardRef(() => MeetingUsersModule),
   ],
   controllers: [MeetingController],
   providers: [MeetingService],

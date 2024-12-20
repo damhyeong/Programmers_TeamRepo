@@ -36,12 +36,6 @@ export class Meeting {
   @Column({ nullable: true })
   end_date: Date;
 
-  @Column({ nullable: true })
-  gender_condition: string;
-
-  @Column({ nullable: true })
-  age_condition: string;
-
   @Column()
   owner_user_id: number;
 

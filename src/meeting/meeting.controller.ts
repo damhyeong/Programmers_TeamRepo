@@ -32,7 +32,6 @@ export class MeetingController {
   constructor(
     private meetingService: MeetingService,
     private meetingUserService: MeetingUsersService,
-    private authService: AuthService,
   ) {}
 
   @Post()
