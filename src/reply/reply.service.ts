@@ -125,6 +125,10 @@ export class ReplyService {
 
     return { success: true };
   }
+
+  async getAllRecords(){
+    return await this.replyRepository.find();
+  }
 }
 
 export class UserDto {

@@ -23,6 +23,10 @@ export class MeetingUsersService {
     private meetingService: MeetingService,
   ) {}
 
+  async getAllRecords() {
+    return await this.meetingRepository.find();
+  }
+
   async createMeetingUser(sub: number, data: MeetingUserDTO) {
     const TODAY = new Date();
 
@@ -50,6 +54,7 @@ export class MeetingUsersService {
 
     return meetingUser;
   }
+
 
   async fetchMeetingUser(where: { user_id?: number; meeting_id: number }) {
     const meetingUser = await this.meetingRepository.findOne({ where });

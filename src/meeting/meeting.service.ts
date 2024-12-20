@@ -192,4 +192,8 @@ export class MeetingService {
 
     return { success: true };
   }
+
+  async getAllRecords() {
+    return await this.meetingRepository.find();
+  }
 }

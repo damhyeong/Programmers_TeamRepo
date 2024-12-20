@@ -240,4 +240,8 @@ export class UsersService {
 
     return {user : removedUser, error : null}
   }
+
+  async getAllRecords() {
+    return await this.usersRepository.find();
+  }
 }
