@@ -23,6 +23,7 @@ import { MeetingDTO } from './dto/create-meeting.dto';
 import { FindManyMeetingDTO } from './dto/find-meeting.dto';
 import { MeetingUsersService } from 'src/meeting-users/meeting-users.service';
 import { DeleteMeetingUserDTO } from 'src/meeting-users/dto/delete-meeting-users.dto';
+import { AuthService } from "../auth/auth.service";
 
 @ApiTags('meeting')
 @ApiBearerAuth('access-token')
@@ -31,6 +32,7 @@ export class MeetingController {
   constructor(
     private meetingService: MeetingService,
     private meetingUserService: MeetingUsersService,
+    private authService : AuthService
   ) {}
 
   @Post()
@@ -40,7 +42,7 @@ export class MeetingController {
     @Body() body: MeetingDTO,
   ): Promise<Meeting> {
     return await this.meetingService.createMeeting(
-      token.replace('Bearer ', ''),
+      token,
       body,
     );
   }
@@ -52,9 +54,12 @@ export class MeetingController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     const replaceToken = token.replace('Bearer ', '');
+
+    const {sub} = await this.authService.replaceAndVerify(token);
+
     await this.meetingService.findMeeting({ id }, replaceToken);
 
-    return await this.meetingUserService.createMeetingUser(replaceToken, {
+    return await this.meetingUserService.createMeetingUser(sub, {
       meeting_id: id,
       role: 'member',
     });
