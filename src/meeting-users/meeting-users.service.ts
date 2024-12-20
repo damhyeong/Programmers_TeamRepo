@@ -23,8 +23,7 @@ export class MeetingUsersService {
     private meetingService: MeetingService,
   ) {}
 
-  async createMeetingUser(token: string, data: MeetingUserDTO) {
-    const { sub } = await this.authService.verifyToken(token);
+  async createMeetingUser(sub: number, data: MeetingUserDTO) {
     const TODAY = new Date();
 
     // 가입하고 싶은 모임의 max_memebers와 meeting_users길이 비교
