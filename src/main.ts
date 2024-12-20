@@ -10,7 +10,8 @@ async function bootstrap() {
     origin: [
       'https://localhost:3000',
       'http://localhost:3000',
-      'https://study-matcher.web.app/',
+      'https://study-matcher.web.app',
+      'https://www.nest-aws.site',
     ],
     credentials: true,
   });
