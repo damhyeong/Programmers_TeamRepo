@@ -1,15 +1,16 @@
-import { Posts } from 'src/posts/posts.entity';
-import { ReplyLikes } from 'src/reply-likes/reply-likes.entity';
-import { Users } from 'src/users/entity/users.entity';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
+  Entity,
+  Index,
   JoinColumn,
+  ManyToOne,
   OneToMany,
-} from 'typeorm';
+  PrimaryGeneratedColumn
+} from "typeorm";
+import { Users } from "../users/entity/users.entity";
+import { ReplyLikes } from "../reply-likes/reply-likes.entity";
+import { Posts } from "../posts/posts.entity";
 
 @Entity()
 export class Reply {
@@ -19,11 +20,12 @@ export class Reply {
   @Column()
   post_id: number;
 
-  @Column()
+  @Column({ nullable : true})
   user_id: number;
 
+  @Index() // 댓글이 많을 때를 대비하여, 부모 댓글에 따라서 정렬되도록 해놨습니다.
   @Column({ nullable: true })
-  reply_id?: number;
+  parent_reply_id: number;
 
   @Column({ default: true })
   is_show: boolean;
@@ -34,29 +36,35 @@ export class Reply {
   @CreateDateColumn()
   created_at: Date;
 
+  // 작성자
   @ManyToOne(() => Users, (user) => user.replies, {
-    nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    nullable: true,
+    onDelete: 'SET NULL', // 작성자 삭제 시 user_id를 NULL로 설정
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
   user: Users;
 
+  // 게시글
   @ManyToOne(() => Posts, (post) => post.replies, {
-    nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE', // 게시글 삭제 시 댓글도 삭제
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'post_id' })
   post: Posts;
 
-  @ManyToOne(() => Reply, (reply) => reply.reply, {
-    nullable: true,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+  // 부모 댓글
+  @ManyToOne(() => Reply, (reply) => reply.childReplies, {
+    nullable: true, // 루트 댓글 허용
+    onDelete: 'SET NULL', // 부모 댓글이 삭제되면 reply_id를 NULL로 설정
+    onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'reply_id' })
-  reply: Reply;
+  @JoinColumn({ name: 'parent_reply_id' })
+  parentReply: Reply | null;
+
+  // 자식 댓글
+  @OneToMany(() => Reply, (reply) => reply.parentReply)
+  childReplies: Reply[];
 
   @OneToMany(() => ReplyLikes, (replyLikes) => replyLikes.reply)
   reply_likes: ReplyLikes[];

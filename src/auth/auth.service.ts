@@ -22,7 +22,7 @@ export class AuthService {
   async replaceAndVerify(token : string) {
     const replacedToken = token.replace("Bearer ", "");
 
-    const payload = await this.jwtService.verifyAsync(replacedToken, {
+    const payload: PayloadDto = await this.jwtService.verifyAsync(replacedToken, {
       secret: jwtConstants.secret,
     });
 

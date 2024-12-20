@@ -25,16 +25,16 @@ export class ReplyLikes {
 
   @ManyToOne(() => Users, (user) => user.reply_likes, {
     nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
   user: Users;
 
   @ManyToOne(() => Reply, (reply) => reply.reply_likes, {
     nullable: false,
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'reply_id' })
   reply: Reply;
