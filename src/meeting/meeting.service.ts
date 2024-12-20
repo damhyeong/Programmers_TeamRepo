@@ -10,7 +10,6 @@ import { Meeting } from './meeting.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MeetingDTO } from './dto/create-meeting.dto';
 import { AuthService } from 'src/auth/auth.service';
-import { LIMIT } from 'src/common/constant/page';
 import { MeetingUsersService } from 'src/meeting-users/meeting-users.service';
 
 @Injectable()
@@ -43,8 +42,9 @@ export class MeetingService {
     topic_id?: number;
     page: number;
     keyword?: string;
+    per_page: number;
   }) {
-    const SKIP = (where.page - 1) * LIMIT;
+    const SKIP = (where.page - 1) * where.per_page;
 
     const query: any = {};
     if (where?.topic_id) {
@@ -61,7 +61,7 @@ export class MeetingService {
 
     const [data, total] = await this.meetingRepository.findAndCount({
       where: conditions.length ? conditions : query,
-      take: LIMIT,
+      take: where.per_page,
       skip: SKIP,
       order: { created_at: 'DESC' },
       relations: ['posts', 'topic'],
@@ -71,7 +71,7 @@ export class MeetingService {
       meeting: data,
       total,
       currentPage: where.page,
-      totalPages: Math.ceil(total / LIMIT),
+      totalPages: Math.ceil(total / where.per_page),
     };
   }
 

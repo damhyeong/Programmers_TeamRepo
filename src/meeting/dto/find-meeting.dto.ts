@@ -15,4 +15,9 @@ export class FindManyMeetingDTO {
   @IsOptional()
   @IsString()
   keyword: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  per_page: number;
 }
