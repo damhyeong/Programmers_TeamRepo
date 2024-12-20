@@ -29,10 +29,16 @@ export class MeetingModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(JwtMiddleware)
-      .exclude({
-        path: 'meeting',
-        method: RequestMethod.GET,
-      })
+      .exclude(
+        {
+          path: 'meeting',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'meeting/:id',
+          method: RequestMethod.GET,
+        },
+      )
       .forRoutes(MeetingController);
   }
 }
