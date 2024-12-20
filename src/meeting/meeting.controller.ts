@@ -22,7 +22,6 @@ import { Meeting } from './meeting.entity';
 import { MeetingDTO } from './dto/create-meeting.dto';
 import { FindManyMeetingDTO } from './dto/find-meeting.dto';
 import { MeetingUsersService } from 'src/meeting-users/meeting-users.service';
-import { AuthService } from 'src/auth/auth.service';
 import { DeleteMeetingUserDTO } from 'src/meeting-users/dto/delete-meeting-users.dto';
 
 @ApiTags('meeting')
@@ -32,7 +31,6 @@ export class MeetingController {
   constructor(
     private meetingService: MeetingService,
     private meetingUserService: MeetingUsersService,
-    private authService: AuthService,
   ) {}
 
   @Post()
@@ -66,6 +64,9 @@ export class MeetingController {
   @ApiQuery({ name: 'topic_id', required: false, type: Number })
   @ApiQuery({ name: 'page', required: true, type: Number })
   @ApiQuery({ name: 'keyword', required: false, type: String })
+  @ApiQuery({ name: 'per_page', required: true, type: Number })
+  @ApiQuery({ name: 'availableOnly', required: false, type: Boolean })
+  @ApiQuery({ name: 'ongoingOnly', required: false, type: Boolean })
   async getManyMeeting(@Query() query: FindManyMeetingDTO) {
     return await this.meetingService.findManyMeeting(query);
   }
