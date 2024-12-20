@@ -31,7 +31,11 @@ export class MeetingUsersService {
     const meeting = await this.meetingService.findMeeting({
       id: data.meeting_id,
     });
-    if (meeting.max_members < meeting.meeting_users.length) {
+
+    // is_active가 true인 사람들만 찾기
+    const activeMembers = await this.countActiveUsers(data.meeting_id);
+
+    if (meeting.max_members <= activeMembers) {
       throw new ForbiddenException('정원 초과되어 가입할 수 없습니다.');
     }
     // end_date 와 오늘 날짜 비교
@@ -55,6 +59,14 @@ export class MeetingUsersService {
     }
 
     return meetingUser;
+  }
+
+  async countActiveUsers(meeting_id: number) {
+    const activeUsers = await this.meetingRepository.find({
+      where: { meeting_id, is_active: true },
+    });
+
+    return activeUsers.length;
   }
 
   async removeMeetingUser({
