@@ -35,7 +35,7 @@ export class MeetingModule implements NestModule {
           method: RequestMethod.GET,
         },
         {
-          path: ':id',
+          path: 'meeting/:id',
           method: RequestMethod.GET,
         },
       )
