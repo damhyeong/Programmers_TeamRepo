@@ -3,7 +3,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from "typeorm";
 import { Posts } from './posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePostDTO } from './dto/create-post.dto';
@@ -40,17 +40,24 @@ export class PostsService {
     return await this.postRepository.save(post);
   }
 
-  async getManyPost(where: { meeting_id: number; page: number }) {
+  // meeting id 에 속한 posts 들을 가져올 수도 있지만, 단순하게 posts 도 가져올 수 있도록 수정. - DTO isOptional 추가함.
+  async getManyPost(where: { meeting_id?: number; page: number }) {
     const SKIP = (where.page - 1) * LIMIT;
     const query = { meeting_id: where.meeting_id };
 
-    const [data, total] = await this.postRepository.findAndCount({
+    const options : FindManyOptions<Posts> = {
       where: query,
       take: LIMIT,
       skip: SKIP,
       order: { created_at: 'DESC' },
       relations: ['user'],
-    });
+    }
+
+    if(!where.meeting_id) {
+      delete options.where
+    }
+
+    const [data, total] = await this.postRepository.findAndCount(options);
 
     const transformedData = data.map((post) => ({
       ...post,
