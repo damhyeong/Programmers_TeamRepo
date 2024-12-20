@@ -16,4 +16,8 @@ export class TopicService {
   async findTopic(where : {id : number}) {
     return await this.topicRepository.findOne({where});
   }
+
+  async allRecords() {
+    return await this.topicRepository.find();
+  }
 }

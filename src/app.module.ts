@@ -31,6 +31,7 @@ import { ReplyLikes } from './reply-likes/reply-likes.entity';
       database: process.env.DB_DATABASE,
       entities: [Meeting, Topic, Posts, Reply, Users, MeetingUsers, ReplyLikes],
       synchronize: true,
+      logging : true,
     }),
     UsersModule,
     TopicModule,

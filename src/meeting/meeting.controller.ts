@@ -22,8 +22,8 @@ import { Meeting } from './meeting.entity';
 import { MeetingDTO } from './dto/create-meeting.dto';
 import { FindManyMeetingDTO } from './dto/find-meeting.dto';
 import { MeetingUsersService } from 'src/meeting-users/meeting-users.service';
-import { AuthService } from 'src/auth/auth.service';
 import { DeleteMeetingUserDTO } from 'src/meeting-users/dto/delete-meeting-users.dto';
+import { AuthService } from "../auth/auth.service";
 
 @ApiTags('meeting')
 @ApiBearerAuth('access-token')
@@ -32,8 +32,13 @@ export class MeetingController {
   constructor(
     private meetingService: MeetingService,
     private meetingUserService: MeetingUsersService,
-    private authService: AuthService,
+    private authService : AuthService
   ) {}
+
+  @Get('database')
+  async getAllRecords() {
+    return await this.meetingService.getAllRecords();
+  }
 
   @Post()
   @ApiBody({ type: MeetingDTO })
@@ -42,7 +47,7 @@ export class MeetingController {
     @Body() body: MeetingDTO,
   ): Promise<Meeting> {
     return await this.meetingService.createMeeting(
-      token.replace('Bearer ', ''),
+      token,
       body,
     );
   }
@@ -54,9 +59,12 @@ export class MeetingController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     const replaceToken = token.replace('Bearer ', '');
+
+    const {sub} = await this.authService.replaceAndVerify(token);
+
     await this.meetingService.findMeeting({ id }, replaceToken);
 
-    return await this.meetingUserService.createMeetingUser(replaceToken, {
+    return await this.meetingUserService.createMeetingUser(sub, {
       meeting_id: id,
       role: 'member',
     });
@@ -66,6 +74,9 @@ export class MeetingController {
   @ApiQuery({ name: 'topic_id', required: false, type: Number })
   @ApiQuery({ name: 'page', required: true, type: Number })
   @ApiQuery({ name: 'keyword', required: false, type: String })
+  @ApiQuery({ name: 'per_page', required: true, type: Number })
+  @ApiQuery({ name: 'availableOnly', required: false, type: Boolean })
+  @ApiQuery({ name: 'ongoingOnly', required: false, type: Boolean })
   async getManyMeeting(@Query() query: FindManyMeetingDTO) {
     return await this.meetingService.findManyMeeting(query);
   }

@@ -38,6 +38,11 @@ export class UsersController {
   ) {
   }
 
+  @Get('database')
+  async getAllRecords() {
+    return await this.usersService.getAllRecords();
+  }
+
   @Post ("/email-check")
   @HttpCode (HttpStatus.OK)
   @ApiBody ({

@@ -29,4 +29,8 @@ export class ReplyLikesService {
       return { success: true, message: 'Like added' };
     }
   }
+
+  async getAllRecords() {
+    return await this.replyLikeRepository.find();
+  }
 }

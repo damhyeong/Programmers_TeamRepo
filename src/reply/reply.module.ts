@@ -29,6 +29,10 @@ export class ReplyModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(JwtMiddleware)
+      .exclude({
+        path: 'replies/database',
+        method: RequestMethod.GET,
+      })
       .forRoutes(ReplyController);
   }
 }

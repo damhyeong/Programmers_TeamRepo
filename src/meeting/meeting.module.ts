@@ -19,7 +19,7 @@ import { MeetingUsersModule } from 'src/meeting-users/meeting-users.module';
     TypeOrmModule.forFeature([Meeting]),
     AuthModule,
     forwardRef(() => PostsModule),
-    MeetingUsersModule,
+    forwardRef(() => MeetingUsersModule),
   ],
   controllers: [MeetingController],
   providers: [MeetingService],
@@ -36,6 +36,10 @@ export class MeetingModule implements NestModule {
         },
         {
           path: 'meeting/:id',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'meeting/database',
           method: RequestMethod.GET,
         },
       )

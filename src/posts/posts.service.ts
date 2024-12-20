@@ -115,6 +115,10 @@ export class PostsService {
 
     return { success: true };
   }
+
+  async getAllRecords() {
+    return await this.postRepository.find();
+  }
 }
 
 export class UserDto {

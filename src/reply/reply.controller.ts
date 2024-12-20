@@ -1,13 +1,13 @@
 import {
   Body,
   Controller,
-  Delete,
+  Delete, Get,
   Headers,
   Param,
   ParseIntPipe,
   Post,
-  Put,
-} from '@nestjs/common';
+  Put
+} from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { ReplyService } from './reply.service';
 import { CreateReplyDTO } from './dto/create-reply.dto';
@@ -80,5 +80,10 @@ export class ReplyController {
       token.replace('Bearer ', ''),
       id,
     );
+  }
+
+  @Get('database')
+  async getAllRecords(){
+    return await this.replyService.getAllRecords();
   }
 }

@@ -1,14 +1,21 @@
 import {
+  forwardRef, HttpException, HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { Like, Repository } from 'typeorm';
+  UnauthorizedException
+} from "@nestjs/common";
+import {
+  FindOptionsWhere,
+  LessThanOrEqual,
+  Like,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { Meeting } from './meeting.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MeetingDTO } from './dto/create-meeting.dto';
 import { AuthService } from 'src/auth/auth.service';
-import { LIMIT } from 'src/common/constant/page';
 import { MeetingUsersService } from 'src/meeting-users/meeting-users.service';
 
 @Injectable()
@@ -16,11 +23,13 @@ export class MeetingService {
   constructor(
     @InjectRepository(Meeting) private meetingRepository: Repository<Meeting>,
     private readonly authService: AuthService,
+    @Inject(forwardRef(() => MeetingUsersService))
     private meetingUserService: MeetingUsersService,
   ) {}
 
   async createMeeting(token: string, data: MeetingDTO): Promise<Meeting> {
-    const { sub } = await this.authService.verifyToken(token);
+    const {sub} = await this.authService.replaceAndVerify(token);
+
 
     const meeting = this.meetingRepository.create({
       owner_user_id: sub,
@@ -35,52 +44,85 @@ export class MeetingService {
 
     return savedMeeting;
   }
-
-  async findManyMeeting(where?: {
+ // where (query) 자체는 page, per_page 속성으로 인해, null 이 되지 않으므로 ? 를 없앴습니다.
+  async findManyMeeting(where: {
     topic_id?: number;
     page: number;
     keyword?: string;
+    per_page: number;
+    availableOnly?: boolean;
+    ongoingOnly?: boolean;
   }) {
-    const SKIP = (where.page - 1) * LIMIT;
+    const SKIP = (where.page - 1) * where.per_page;
 
-    const query: any = {};
+    const conditions: FindOptionsWhere<any> = {};
+
+    // 주제 ID 필터링
     if (where?.topic_id) {
-      query.topic_id = where.topic_id;
+      conditions.topic_id = where.topic_id;
     }
 
-    const conditions: any[] = [];
+    // keyword 필터링
     if (where?.keyword) {
-      conditions.push(
-        { title: Like(`%${where.keyword}%`) },
-        { description: Like(`%${where.keyword}%`) },
-      );
+      conditions.title = Like(`%${where.keyword}%`);
+      conditions.description = Like(`%${where.keyword}%`);
+    }
+
+    // 진행 중인 미팅 필터링
+    if (where?.ongoingOnly) {
+      const today = new Date();
+
+      conditions.start_date = LessThanOrEqual(today);
+      conditions.end_date = MoreThanOrEqual(today);
     }
 
     const [data, total] = await this.meetingRepository.findAndCount({
-      where: conditions.length ? conditions : query,
-      take: LIMIT,
+      where: conditions,
+      take: where.per_page,
       skip: SKIP,
       order: { created_at: 'DESC' },
       relations: ['posts', 'topic'],
     });
 
+    // 각 미팅에 대해 활성 사용자 수를 계산하여 필터링
+    const meetingsWithActiveUserCount = [];
+    for (const meeting of data) {
+      const activeUserCount = await this.meetingUserService.countActiveUsers(
+        meeting.id,
+      );
+      if (meeting.max_members > activeUserCount) {
+        meetingsWithActiveUserCount.push({
+          ...meeting,
+        });
+      }
+    }
+
     return {
-      meeting: data,
+      meeting: meetingsWithActiveUserCount,
       total,
       currentPage: where.page,
-      totalPages: Math.ceil(total / LIMIT),
+      totalPages: Math.ceil(total / where.per_page),
     };
   }
 
-  // 에러를 먼저 고치기 위해 token? : string 에서 token : string 으로 바꿨습니다.
+  // 이 라우트는 JWT 미들웨어를 거치지 않음 - jwt token 을 가지고 오는 경우, 그건 다른 메서드에서 부른 것.
   async findMeeting(where: { id: number }, token?: string) {
     let sub: number | null = null;
 
     if (token) {
-      const payload = await this.authService
-        .verifyToken(token)
-        .catch(() => null);
-      sub = payload?.sub || null;
+
+      try{
+        const payload = await this.authService.verifyToken(token);
+
+        sub = payload?.sub || null;
+      } catch (error) {
+        throw new HttpException(
+          {
+            message : "다른 컨트롤러에서 다루다가 jwt 잘못 넘길 경우 생기는 에러"
+          },
+          HttpStatus.UNAUTHORIZED
+        )
+      }
     }
 
     const meeting = await this.meetingRepository.findOne({
@@ -149,5 +191,9 @@ export class MeetingService {
     await this.meetingRepository.delete(where);
 
     return { success: true };
+  }
+
+  async getAllRecords() {
+    return await this.meetingRepository.find();
   }
 }
