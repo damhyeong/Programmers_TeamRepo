@@ -35,6 +35,10 @@ export class UsersModule implements NestModule {
           path: 'users/login',
           method: RequestMethod.POST,
         },
+        {
+          path: 'users/database',
+          method: RequestMethod.GET,
+        },
       )
       .forRoutes(UsersController);
   }

@@ -35,6 +35,11 @@ export class MeetingController {
     private authService : AuthService
   ) {}
 
+  @Get('database')
+  async getAllRecords() {
+    return await this.meetingService.getAllRecords();
+  }
+
   @Post()
   @ApiBody({ type: MeetingDTO })
   async postMeeting(

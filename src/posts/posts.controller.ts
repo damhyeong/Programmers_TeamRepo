@@ -28,6 +28,11 @@ export class PostsController {
     private replyService: ReplyService,
   ) {}
 
+  @Get('/database')
+  async getAllRecords() {
+    return await this.postService.getAllRecords();
+  }
+
   @Post()
   @ApiBody({ type: CreatePostDTO })
   async postPosts(
@@ -85,4 +90,5 @@ export class PostsController {
       token: token.replace('Bearer ', ''),
     });
   }
+
 }

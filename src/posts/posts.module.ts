@@ -31,6 +31,10 @@ export class PostsModule implements NestModule {
       .apply(JwtMiddleware)
       .exclude(
         {
+          path: 'posts/database',
+          method: RequestMethod.GET,
+        },
+        {
           path: 'posts',
           method: RequestMethod.GET,
         },

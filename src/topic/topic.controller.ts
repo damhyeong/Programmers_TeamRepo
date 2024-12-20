@@ -11,4 +11,9 @@ export class TopicController {
   async getManyTopic() {
     return await this.topicService.findManyTopic();
   }
+
+  @Get('database')
+  async getAllRecords() {
+    return await this.topicService.allRecords();
+  }
 }

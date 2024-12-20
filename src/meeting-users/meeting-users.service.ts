@@ -23,6 +23,10 @@ export class MeetingUsersService {
     private meetingService: MeetingService,
   ) {}
 
+  async getAllRecords() {
+    return await this.meetingRepository.find();
+  }
+
   async createMeetingUser(sub: number, data: MeetingUserDTO) {
     const TODAY = new Date();
 

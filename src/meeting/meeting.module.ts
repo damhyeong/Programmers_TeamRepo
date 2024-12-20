@@ -38,6 +38,10 @@ export class MeetingModule implements NestModule {
           path: 'meeting/:id',
           method: RequestMethod.GET,
         },
+        {
+          path: 'meeting/database',
+          method: RequestMethod.GET,
+        },
       )
       .forRoutes(MeetingController);
   }
