@@ -1,10 +1,10 @@
 import {
-  forwardRef,
+  forwardRef, HttpException, HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+  UnauthorizedException
+} from "@nestjs/common";
 import {
   FindOptionsWhere,
   LessThanOrEqual,
@@ -27,7 +27,9 @@ export class MeetingService {
     private meetingUserService: MeetingUsersService,
   ) {}
 
-  async createMeeting(sub: number, data: MeetingDTO): Promise<Meeting> {
+  async createMeeting(token: string, data: MeetingDTO): Promise<Meeting> {
+    const {sub} = await this.authService.replaceAndVerify(token);
+
 
     const meeting = this.meetingRepository.create({
       owner_user_id: sub,
@@ -42,8 +44,8 @@ export class MeetingService {
 
     return savedMeeting;
   }
-
-  async findManyMeeting(where?: {
+ // where (query) 자체는 page, per_page 속성으로 인해, null 이 되지 않으므로 ? 를 없앴습니다.
+  async findManyMeeting(where: {
     topic_id?: number;
     page: number;
     keyword?: string;
@@ -103,15 +105,24 @@ export class MeetingService {
     };
   }
 
-  // 에러를 먼저 고치기 위해 token? : string 에서 token : string 으로 바꿨습니다.
+  // 이 라우트는 JWT 미들웨어를 거치지 않음 - jwt token 을 가지고 오는 경우, 그건 다른 메서드에서 부른 것.
   async findMeeting(where: { id: number }, token?: string) {
     let sub: number | null = null;
 
     if (token) {
-      const payload = await this.authService
-        .verifyToken(token)
-        .catch(() => null);
-      sub = payload?.sub || null;
+
+      try{
+        const payload = await this.authService.verifyToken(token);
+
+        sub = payload?.sub || null;
+      } catch (error) {
+        throw new HttpException(
+          {
+            message : "다른 컨트롤러에서 다루다가 jwt 잘못 넘길 경우 생기는 에러"
+          },
+          HttpStatus.UNAUTHORIZED
+        )
+      }
     }
 
     const meeting = await this.meetingRepository.findOne({
