@@ -51,6 +51,7 @@ export class MeetingUsersService {
     return meetingUser;
   }
 
+
   async fetchMeetingUser(where: { user_id?: number; meeting_id: number }) {
     const meetingUser = await this.meetingRepository.findOne({ where });
     if (!meetingUser) {
