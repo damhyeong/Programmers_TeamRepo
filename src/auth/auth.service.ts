@@ -12,7 +12,7 @@ export class AuthService {
   }
 
   async verifyToken(token: string) : Promise<{sub : number, email : string, username : string}> {
-    const payload = await this.jwtService.verifyAsync(token, {
+    const payload : PayloadDto = await this.jwtService.verifyAsync(token, {
       secret: jwtConstants.secret,
     });
 
@@ -22,7 +22,7 @@ export class AuthService {
   async replaceAndVerify(token : string) : Promise<{sub : number, email : string, username : string}> {
     const replacedToken = token.replace("Bearer ", "");
 
-    const payload: PayloadDto = await this.jwtService.verifyAsync(replacedToken, {
+    const payload : PayloadDto = await this.jwtService.verifyAsync(replacedToken, {
       secret: jwtConstants.secret,
     });
 
