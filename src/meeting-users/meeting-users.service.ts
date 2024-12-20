@@ -17,8 +17,7 @@ export class MeetingUsersService {
     private readonly authService: AuthService,
   ) {}
 
-  async createMeetingUser(token: string, data: MeetingUserDTO) {
-    const { sub } = await this.authService.verifyToken(token);
+  async createMeetingUser(sub: number, data: MeetingUserDTO) {
 
     const meetingUser = this.meetingRepository.create({
       user_id: sub,
