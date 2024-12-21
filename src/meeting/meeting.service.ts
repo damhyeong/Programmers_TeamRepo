@@ -137,7 +137,10 @@ export class MeetingService {
       (meetingUser) => meetingUser.user_id === sub,
     );
 
+
+
     const meetingUsersWithUserDTO = meeting.meeting_users.map((meetingUser) => {
+
       const { password, ...userWithoutPassword } = meetingUser.user;
 
       return {
