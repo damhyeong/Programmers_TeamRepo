@@ -13,6 +13,7 @@ async function bootstrap() {
       'https://study-matcher.web.app',
       'https://www.nest-aws.site',
     ],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
 
