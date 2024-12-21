@@ -18,6 +18,8 @@ import { MeetingUsersModule } from './meeting-users/meeting-users.module';
 import { MeetingUsers } from './meeting-users/meeting-users.entity';
 import { ReplyLikesModule } from './reply-likes/reply-likes.module';
 import { ReplyLikes } from './reply-likes/reply-likes.entity';
+import { ImageService } from './image/image.service';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
@@ -40,8 +42,9 @@ import { ReplyLikes } from './reply-likes/reply-likes.entity';
     ReplyModule,
     MeetingUsersModule,
     ReplyLikesModule,
+    ImageModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ImageService],
 })
 export class AppModule {}
