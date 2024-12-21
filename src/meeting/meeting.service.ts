@@ -134,12 +134,13 @@ export class MeetingService {
     }
 
     const participation = meeting.meeting_users.some(
-      (meetingUser) => meetingUser.user_id === sub,
+      (meetingUser) => meetingUser.user_id === sub && meetingUser.is_active,
     );
 
 
 
     const meetingUsersWithUserDTO = meeting.meeting_users.map((meetingUser) => {
+
 
       const { password, ...userWithoutPassword } = meetingUser.user;
 

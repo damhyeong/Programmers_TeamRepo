@@ -81,6 +81,7 @@ export class PostsService {
       throw new NotFoundException();
     }
 
+
     const transformedPost = {
       ...post,
       user: new UserDto(post.user),
