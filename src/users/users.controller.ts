@@ -254,7 +254,7 @@ export class UsersController {
   async deleteUser(@Headers('authorization') token : string) {
     const {user, error} =  await this.usersService.deleteUser(token.replace('Bearer ', ''));
 
-    if(user){
+    if(error){
       throw error;
     } else {
       return {
