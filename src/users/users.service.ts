@@ -20,6 +20,8 @@ export class UsersService {
   ) {}
 
   async createUser(signUpDto: SignUpDto): Promise<Boolean> {
+    // const salt = bcypt.createSalt(new Date());
+
     const hashPwd = await bcrypt.hash(signUpDto.password, 10);
 
     await this.usersRepository.save({
